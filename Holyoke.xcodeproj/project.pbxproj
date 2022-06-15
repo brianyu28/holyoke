@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D384C790285588AE00E9357F /* Chessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C78F285588AE00E9357F /* Chessboard.swift */; };
+		D384C79128558B5200E9357F /* Chessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C78F285588AE00E9357F /* Chessboard.swift */; };
+		D384C79228558B5500E9357F /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468E1285175F400A97CC1 /* Game.swift */; };
+		D384C79428558E1700E9357F /* Move.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C79328558E1700E9357F /* Move.swift */; };
+		D384C79528558E2E00E9357F /* Move.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C79328558E1700E9357F /* Move.swift */; };
 		D3B468D0285174A600A97CC1 /* HolyokeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468BC285174A500A97CC1 /* HolyokeApp.swift */; };
 		D3B468D1285174A600A97CC1 /* HolyokeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468BC285174A500A97CC1 /* HolyokeApp.swift */; };
 		D3B468D2285174A600A97CC1 /* HolyokeDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468BD285174A500A97CC1 /* HolyokeDocument.swift */; };
@@ -15,9 +20,12 @@
 		D3B468D5285174A600A97CC1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468BE285174A500A97CC1 /* ContentView.swift */; };
 		D3B468D6285174A600A97CC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3B468BF285174A600A97CC1 /* Assets.xcassets */; };
 		D3B468D7285174A600A97CC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3B468BF285174A600A97CC1 /* Assets.xcassets */; };
+		D3B468E2285175F400A97CC1 /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468E1285175F400A97CC1 /* Game.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D384C78F285588AE00E9357F /* Chessboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chessboard.swift; sourceTree = "<group>"; };
+		D384C79328558E1700E9357F /* Move.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Move.swift; sourceTree = "<group>"; };
 		D3B468BC285174A500A97CC1 /* HolyokeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolyokeApp.swift; sourceTree = "<group>"; };
 		D3B468BD285174A500A97CC1 /* HolyokeDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolyokeDocument.swift; sourceTree = "<group>"; };
 		D3B468BE285174A500A97CC1 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -27,6 +35,7 @@
 		D3B468CC285174A600A97CC1 /* Holyoke.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Holyoke.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3B468CE285174A600A97CC1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3B468CF285174A600A97CC1 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
+		D3B468E1285175F400A97CC1 /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +69,7 @@
 		D3B468BB285174A500A97CC1 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				D3B468E0285175E900A97CC1 /* Gameplay */,
 				D3B468BC285174A500A97CC1 /* HolyokeApp.swift */,
 				D3B468BD285174A500A97CC1 /* HolyokeDocument.swift */,
 				D3B468BE285174A500A97CC1 /* ContentView.swift */,
@@ -92,6 +102,16 @@
 				D3B468CF285174A600A97CC1 /* macOS.entitlements */,
 			);
 			path = macOS;
+			sourceTree = "<group>";
+		};
+		D3B468E0285175E900A97CC1 /* Gameplay */ = {
+			isa = PBXGroup;
+			children = (
+				D3B468E1285175F400A97CC1 /* Game.swift */,
+				D384C79328558E1700E9357F /* Move.swift */,
+				D384C78F285588AE00E9357F /* Chessboard.swift */,
+			);
+			path = Gameplay;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -192,9 +212,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D384C790285588AE00E9357F /* Chessboard.swift in Sources */,
 				D3B468D2285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
 				D3B468D0285174A600A97CC1 /* HolyokeApp.swift in Sources */,
 				D3B468D4285174A600A97CC1 /* ContentView.swift in Sources */,
+				D384C79428558E1700E9357F /* Move.swift in Sources */,
+				D3B468E2285175F400A97CC1 /* Game.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -203,7 +226,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3B468D3285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
+				D384C79228558B5500E9357F /* Game.swift in Sources */,
+				D384C79128558B5200E9357F /* Chessboard.swift in Sources */,
 				D3B468D1285174A600A97CC1 /* HolyokeApp.swift in Sources */,
+				D384C79528558E2E00E9357F /* Move.swift in Sources */,
 				D3B468D5285174A600A97CC1 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

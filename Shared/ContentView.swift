@@ -12,6 +12,11 @@ struct ContentView: View {
 
     var body: some View {
         TextEditor(text: $document.text)
+            .onAppear {
+                print("test")
+                let board = Chessboard()
+                print(board)
+            }
     }
 }
 
