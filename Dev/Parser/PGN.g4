@@ -102,7 +102,7 @@ element
  ;
 
 move_number_indication
- : INTEGER PERIOD?
+ : INTEGER PERIOD*
  ;
 
 san_move

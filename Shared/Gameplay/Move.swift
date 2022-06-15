@@ -13,6 +13,15 @@ import Foundation
 enum PlayerColor {
     case white
     case black
+    
+    var nextColor: PlayerColor {
+        switch self {
+        case .white:
+            return .black
+        case .black:
+            return .white
+        }
+    }
 }
 
 /**
