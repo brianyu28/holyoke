@@ -16,10 +16,11 @@ struct Chessboard : CustomStringConvertible {
     private var position: ChessPosition
     private var mostRecentMove: Move?
     
-    private var whiteRightToCastleKingside = true
-    private var whiteRightToCastleQueenside = true
-    private var blackRightToCastleKingside = true
-    private var blackRightToCastleQueenside = true
+    // Properties computed on each move
+    private var whiteRightToCastleKingside: Bool = true
+    private var whiteRightToCastleQueenside: Bool = true
+    private var blackRightToCastleKingside: Bool = true
+    private var blackRightToCastleQueenside: Bool = true
     
     // Starts at 1 on the first turn, increments after each Black turn
     private var fullmoveNumber : Int
@@ -49,7 +50,7 @@ struct Chessboard : CustomStringConvertible {
     
     // Initialize in starting position
     init() {
-        position = [
+        let startingPosition = [
             [
                 Piece(color: .black, type: .rook),
                 Piece(color: .black, type: .knight),
@@ -95,9 +96,7 @@ struct Chessboard : CustomStringConvertible {
                 Piece(color: .white, type: .rook),
             ]
         ]
-        mostRecentMove = nil
-        fullmoveNumber = 1
-        halfmoveClock = 0
+        self.init(position: startingPosition, mostRecentMove: nil, fullmoveNumber: 1, halfmoveClock: 0)
     }
     
     var description : String {
