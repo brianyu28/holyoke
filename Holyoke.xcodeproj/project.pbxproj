@@ -7,11 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D357114D285A024C002C0CC1 /* PGNListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3571149285A024C002C0CC1 /* PGNListener.swift */; };
+		D357114E285A024C002C0CC1 /* PGNListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3571149285A024C002C0CC1 /* PGNListener.swift */; };
+		D357114F285A024C002C0CC1 /* PGNLexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D357114A285A024C002C0CC1 /* PGNLexer.swift */; };
+		D3571150285A024C002C0CC1 /* PGNLexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D357114A285A024C002C0CC1 /* PGNLexer.swift */; };
+		D3571151285A024C002C0CC1 /* PGNBaseListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D357114B285A024C002C0CC1 /* PGNBaseListener.swift */; };
+		D3571152285A024C002C0CC1 /* PGNBaseListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D357114B285A024C002C0CC1 /* PGNBaseListener.swift */; };
+		D3571153285A024C002C0CC1 /* PGNParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D357114C285A024C002C0CC1 /* PGNParser.swift */; };
+		D3571154285A024C002C0CC1 /* PGNParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D357114C285A024C002C0CC1 /* PGNParser.swift */; };
+		D35711E1285A0B49002C0CC1 /* Antlr4 in Frameworks */ = {isa = PBXBuildFile; productRef = D35711E0285A0B49002C0CC1 /* Antlr4 */; };
+		D35711E2285A0B49002C0CC1 /* Antlr4 in Embed Frameworks */ = {isa = PBXBuildFile; productRef = D35711E0285A0B49002C0CC1 /* Antlr4 */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		D35711E5285A0B4F002C0CC1 /* Antlr4 in Frameworks */ = {isa = PBXBuildFile; productRef = D35711E4285A0B4F002C0CC1 /* Antlr4 */; };
+		D35711E6285A0B4F002C0CC1 /* Antlr4 in Embed Frameworks */ = {isa = PBXBuildFile; productRef = D35711E4285A0B4F002C0CC1 /* Antlr4 */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		D384C790285588AE00E9357F /* Chessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C78F285588AE00E9357F /* Chessboard.swift */; };
 		D384C79128558B5200E9357F /* Chessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C78F285588AE00E9357F /* Chessboard.swift */; };
 		D384C79228558B5500E9357F /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468E1285175F400A97CC1 /* Game.swift */; };
 		D384C79428558E1700E9357F /* Move.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C79328558E1700E9357F /* Move.swift */; };
 		D384C79528558E2E00E9357F /* Move.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C79328558E1700E9357F /* Move.swift */; };
+		D3AC3CAB285A5FF5000BC33B /* PGN.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AC3CAA285A5FF5000BC33B /* PGN.swift */; };
+		D3AC3CAC285A5FF5000BC33B /* PGN.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AC3CAA285A5FF5000BC33B /* PGN.swift */; };
 		D3B468D0285174A600A97CC1 /* HolyokeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468BC285174A500A97CC1 /* HolyokeApp.swift */; };
 		D3B468D1285174A600A97CC1 /* HolyokeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468BC285174A500A97CC1 /* HolyokeApp.swift */; };
 		D3B468D2285174A600A97CC1 /* HolyokeDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468BD285174A500A97CC1 /* HolyokeDocument.swift */; };
@@ -27,9 +41,40 @@
 		D3CFE323285972AB00E25606 /* TestingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFE321285972AB00E25606 /* TestingView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		D35711E3285A0B49002C0CC1 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D35711E2285A0B49002C0CC1 /* Antlr4 in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D35711E7285A0B4F002C0CC1 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D35711E6285A0B4F002C0CC1 /* Antlr4 in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		D3571149285A024C002C0CC1 /* PGNListener.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PGNListener.swift; sourceTree = "<group>"; };
+		D357114A285A024C002C0CC1 /* PGNLexer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PGNLexer.swift; sourceTree = "<group>"; };
+		D357114B285A024C002C0CC1 /* PGNBaseListener.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PGNBaseListener.swift; sourceTree = "<group>"; };
+		D357114C285A024C002C0CC1 /* PGNParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PGNParser.swift; sourceTree = "<group>"; };
+		D35711DF285A0A55002C0CC1 /* antlr4 */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = antlr4; path = Packages/antlr4; sourceTree = "<group>"; };
 		D384C78F285588AE00E9357F /* Chessboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chessboard.swift; sourceTree = "<group>"; };
 		D384C79328558E1700E9357F /* Move.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Move.swift; sourceTree = "<group>"; };
+		D3AC3CAA285A5FF5000BC33B /* PGN.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGN.swift; sourceTree = "<group>"; };
 		D3B468BC285174A500A97CC1 /* HolyokeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolyokeApp.swift; sourceTree = "<group>"; };
 		D3B468BD285174A500A97CC1 /* HolyokeDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolyokeDocument.swift; sourceTree = "<group>"; };
 		D3B468BE285174A500A97CC1 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -49,6 +94,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D35711E5285A0B4F002C0CC1 /* Antlr4 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -56,12 +102,41 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D35711E1285A0B49002C0CC1 /* Antlr4 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D357113C285A01A5002C0CC1 /* PGN */ = {
+			isa = PBXGroup;
+			children = (
+				D3AC3CAA285A5FF5000BC33B /* PGN.swift */,
+				D357114B285A024C002C0CC1 /* PGNBaseListener.swift */,
+				D357114A285A024C002C0CC1 /* PGNLexer.swift */,
+				D3571149285A024C002C0CC1 /* PGNListener.swift */,
+				D357114C285A024C002C0CC1 /* PGNParser.swift */,
+			);
+			path = PGN;
+			sourceTree = "<group>";
+		};
+		D35711DB285A080E002C0CC1 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				D35711DF285A0A55002C0CC1 /* antlr4 */,
+			);
+			name = Packages;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		D35711DD285A0850002C0CC1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D3B468B6285174A500A97CC1 = {
 			isa = PBXGroup;
 			children = (
@@ -69,6 +144,7 @@
 				D3B468C6285174A600A97CC1 /* iOS */,
 				D3B468CD285174A600A97CC1 /* macOS */,
 				D3B468C5285174A600A97CC1 /* Products */,
+				D35711DD285A0850002C0CC1 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -77,7 +153,9 @@
 			children = (
 				D3CFE31F28596C7C00E25606 /* App */,
 				D3B468E0285175E900A97CC1 /* Gameplay */,
+				D357113C285A01A5002C0CC1 /* PGN */,
 				D3CFE31B28596C6300E25606 /* Views */,
+				D35711DB285A080E002C0CC1 /* Packages */,
 				D3B468BF285174A600A97CC1 /* Assets.xcassets */,
 			);
 			path = Shared;
@@ -148,12 +226,16 @@
 				D3B468C0285174A600A97CC1 /* Sources */,
 				D3B468C1285174A600A97CC1 /* Frameworks */,
 				D3B468C2285174A600A97CC1 /* Resources */,
+				D35711E7285A0B4F002C0CC1 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = "Holyoke (iOS)";
+			packageProductDependencies = (
+				D35711E4285A0B4F002C0CC1 /* Antlr4 */,
+			);
 			productName = "Holyoke (iOS)";
 			productReference = D3B468C4285174A600A97CC1 /* Holyoke.app */;
 			productType = "com.apple.product-type.application";
@@ -165,12 +247,16 @@
 				D3B468C8285174A600A97CC1 /* Sources */,
 				D3B468C9285174A600A97CC1 /* Frameworks */,
 				D3B468CA285174A600A97CC1 /* Resources */,
+				D35711E3285A0B49002C0CC1 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = "Holyoke (macOS)";
+			packageProductDependencies = (
+				D35711E0285A0B49002C0CC1 /* Antlr4 */,
+			);
 			productName = "Holyoke (macOS)";
 			productReference = D3B468CC285174A600A97CC1 /* Holyoke.app */;
 			productType = "com.apple.product-type.application";
@@ -237,10 +323,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				D384C790285588AE00E9357F /* Chessboard.swift in Sources */,
+				D3AC3CAB285A5FF5000BC33B /* PGN.swift in Sources */,
+				D3571151285A024C002C0CC1 /* PGNBaseListener.swift in Sources */,
+				D357114D285A024C002C0CC1 /* PGNListener.swift in Sources */,
+				D357114F285A024C002C0CC1 /* PGNLexer.swift in Sources */,
 				D3CFE31D28596C6C00E25606 /* ChessboardView.swift in Sources */,
 				D3B468D2285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
 				D3B468D0285174A600A97CC1 /* HolyokeApp.swift in Sources */,
 				D3B468D4285174A600A97CC1 /* ContentView.swift in Sources */,
+				D3571153285A024C002C0CC1 /* PGNParser.swift in Sources */,
 				D3CFE322285972AB00E25606 /* TestingView.swift in Sources */,
 				D384C79428558E1700E9357F /* Move.swift in Sources */,
 				D3B468E2285175F400A97CC1 /* Game.swift in Sources */,
@@ -252,10 +343,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3B468D3285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
+				D3AC3CAC285A5FF5000BC33B /* PGN.swift in Sources */,
+				D3571152285A024C002C0CC1 /* PGNBaseListener.swift in Sources */,
+				D357114E285A024C002C0CC1 /* PGNListener.swift in Sources */,
+				D3571150285A024C002C0CC1 /* PGNLexer.swift in Sources */,
 				D3CFE31E28596C6C00E25606 /* ChessboardView.swift in Sources */,
 				D384C79228558B5500E9357F /* Game.swift in Sources */,
 				D384C79128558B5200E9357F /* Chessboard.swift in Sources */,
 				D3B468D1285174A600A97CC1 /* HolyokeApp.swift in Sources */,
+				D3571154285A024C002C0CC1 /* PGNParser.swift in Sources */,
 				D3CFE323285972AB00E25606 /* TestingView.swift in Sources */,
 				D384C79528558E2E00E9357F /* Move.swift in Sources */,
 				D3B468D5285174A600A97CC1 /* ContentView.swift in Sources */,
@@ -530,6 +626,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D35711E0285A0B49002C0CC1 /* Antlr4 */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Antlr4;
+		};
+		D35711E4285A0B4F002C0CC1 /* Antlr4 */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Antlr4;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D3B468B7285174A500A97CC1 /* Project object */;
 }

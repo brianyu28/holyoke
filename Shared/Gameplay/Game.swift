@@ -24,20 +24,3 @@ struct Game {
     let tree : GameTree
 }
 
-/**
- Represents a node in a tree of moves.
- */
-struct GameTree {
-    // Move
-    let move : Move
-    
-    // Which player's turn
-    let player : PlayerColor
-    
-    // Comments on the move
-    let commentary : String
-    
-    // Annotations on the move itself, e.g. !, ?, !!, ?!
-    let annotations : String
-    let lines : [GameTree]
-}
