@@ -8,13 +8,6 @@
 import Foundation
 import Antlr4
 
-enum PGNGameTermination: String {
-    case WhiteWin = "1-0"
-    case BlackWin = "0-1"
-    case Draw = "1/2-1/2"
-    case Asterisk = "*"
-}
-
 class PGNGame {
     /**
      Game metadata. Standard game metadata includes "Event", "Site", "Date", "Round", "White", "Black", "Result"
@@ -24,7 +17,7 @@ class PGNGame {
     /**
      Tree of moves.
      */
-    var variations: PGNGameVariations
+    var root: PGNGameNode
     
     /**
      Game termination symbol.
@@ -33,27 +26,38 @@ class PGNGame {
     
     init() {
         metadata = []
-        variations = PGNGameVariations(moveNumber: 1, playerColor: .white)
-        gameTermination = .Asterisk
+        root = PGNGameNode(parent: nil)
+        gameTermination = .asterisk
     }
 }
 
-class PGNGameVariations {
-    let moveNumber : Int
-    let playerColor : PlayerColor
+/**
+ Represents a node in a game tree.
+ */
+class PGNGameNode {
+    let moveNumber: Int
+    let playerColor: PlayerColor
     
-    var variations: [PGNGameVariation]
-    var parentVariation: PGNGameVariation?
+    var variations: [PGNGameNode]
+    var parent: PGNGameNode?
     
-    init(moveNumber: Int, playerColor: PlayerColor) {
-        self.moveNumber = moveNumber
-        self.playerColor = playerColor
-        variations = []
-        parentVariation = nil
-    }
+    var move: String?
+    var numericAnnotation : String
+    var braceComment : String
+    var restOfLineComment : String
+    var annotations : String
     
-    func addVariation(variation: PGNGameVariation) {
-        variations.append(variation)
+    init(parent: PGNGameNode?) {
+        self.moveNumber = parent?.nextMoveNumber ?? 0
+        self.playerColor = parent?.playerColor.nextColor ?? .black
+        self.variations = []
+        self.parent = parent
+        
+        self.move = nil
+        self.numericAnnotation = ""
+        self.braceComment = ""
+        self.restOfLineComment = ""
+        self.annotations = ""
     }
     
     // If current player is White, next move is the same move number
@@ -65,49 +69,46 @@ class PGNGameVariations {
             return moveNumber + 1
         }
     }
-}
-
-/**
- Represents a node in a tree of moves.
- */
-class PGNGameVariation {
-    var moveText : String
-    var numericAnnotation : String
-    var braceComment : String
-    var restOfLineComment : String
-    var annotations : String
-    var variationGroup: PGNGameVariations
     
-    // Subsequent moves that follow from this move
-    var variations : PGNGameVariations
-    
-    init(variationGroup: PGNGameVariations) {
-        moveText = ""
-        numericAnnotation = ""
-        braceComment = ""
-        restOfLineComment = ""
-        annotations = ""
-        variations = PGNGameVariations(moveNumber: variationGroup.nextMoveNumber, playerColor: variationGroup.playerColor.nextColor)
-        self.variationGroup = variationGroup
-        variations.parentVariation = self
+    var currentMoveDescription: String {
+        return "\(moveNumber)\(playerColor == .white ? "." : "...") \(move ?? "--") \(braceComment != "" ? "{\(braceComment)}" : "")"
     }
     
-    func currentMoveDescription() -> String {
-        return "\(variationGroup.moveNumber)\(variationGroup.playerColor == .white ? "." : "...") \(moveText) \(annotations != "" ? "{\(annotations)}" : "")"
+    /**
+     Add an existing node as a child of the node.
+     */
+    func addVariation(variation: PGNGameNode) {
+        self.variations.append(variation)
+    }
+    
+    /**
+     Create and return a new child node.
+     */
+    func addNewVariation() -> PGNGameNode {
+        let variation = PGNGameNode(parent: self)
+        self.variations.append(variation)
+        return variation
     }
 }
 
+enum PGNGameTermination: String {
+    case whiteWin = "1-0"
+    case blackWin = "0-1"
+    case draw = "1/2-1/2"
+    case asterisk = "*"
+}
 
 class PGNGameListener : PGNBaseListener {
     
     private var games: [PGNGame]
     private var currentGame: PGNGame
-    private var variationStack: [PGNGameVariation?]
+    private var variationStack: [PGNGameNode]
     
     override init() {
         games = []
         currentGame = PGNGame()
-        variationStack = []
+        let firstMoveNode = currentGame.root.addNewVariation()
+        variationStack = [firstMoveNode]
     }
     
     static func parseGamesFromPGNString(pgn: String) -> [PGNGame] {
@@ -142,36 +143,30 @@ class PGNGameListener : PGNBaseListener {
         if let san_move = ctx.san_move() {
             let moveText = san_move.getText() // TODO: Separate move from move annotation.
             
-            let last = variationStack.last
-            if last != nil, let variation = last! {
-                // Variation stack already has a move, add as a next move to the existing move
-                let newVariation = PGNGameVariation(variationGroup: variation.variations)
-                newVariation.moveText = moveText
-                variation.variations.addVariation(variation: newVariation)
-                variationStack.removeLast()
-                variationStack.append(newVariation)
-            } else {
-                // Variation stack is empty, this is the first move
-                let newVariation = PGNGameVariation(variationGroup: currentGame.variations)
-                newVariation.moveText = moveText
-                currentGame.variations.addVariation(variation: newVariation)
-                variationStack.append(newVariation)
+            if let node = variationStack.last {
+                if let _ = node.move {
+                    // Node already has a move, add this element as a child
+                    let newNode = node.addNewVariation()
+                    newNode.move = moveText
+                    variationStack.removeLast()
+                    variationStack.append(newNode)
+                } else {
+                    // Node doesn't have a move, add the move to this node
+                    node.move = moveText
+                }
             }
         } else if let braceComment = ctx.BRACE_COMMENT() {
-            let last = variationStack.last
-            if last != nil, let variation = last! {
-                variation.annotations = String(braceComment.getText().dropFirst().dropLast()).trimmingCharacters(in: .whitespacesAndNewlines)
+            if let node = variationStack.last {
+                node.braceComment = String(braceComment.getText().dropFirst().dropLast()).trimmingCharacters(in: .whitespacesAndNewlines)
             }
         }
     }
     
     override func enterRecursive_variation(_ ctx: PGNParser.Recursive_variationContext) {
-        let last = variationStack.last
-        if last != nil, let variation = last! {
-            let parentVariation = variation.variationGroup.parentVariation
-            variationStack.append(parentVariation)
-        } else {
-            variationStack.append(nil)
+        if let node = variationStack.last {
+            if let parent = node.parent {
+                variationStack.append(parent.addNewVariation())
+            }
         }
     }
     
@@ -183,30 +178,27 @@ class PGNGameListener : PGNBaseListener {
     
     override func exitGame_termination(_ ctx: PGNParser.Game_terminationContext) {
         if ctx.WHITE_WINS() != nil {
-            currentGame.gameTermination = .WhiteWin
+            currentGame.gameTermination = .whiteWin
         } else if ctx.BLACK_WINS() != nil {
-            currentGame.gameTermination = .BlackWin
+            currentGame.gameTermination = .blackWin
         } else if ctx.DRAWN_GAME() != nil {
-            currentGame.gameTermination = .Draw
+            currentGame.gameTermination = .draw
         } else {
-            currentGame.gameTermination = .Asterisk
+            currentGame.gameTermination = .asterisk
         }
     }
     
     override func exitPgn_game(_ ctx: PGNParser.Pgn_gameContext) {
         
-        func printVariation(variation: PGNGameVariation?, indent: Int) {
-            guard let variation = variation else {
-                return
-            }
+        func printNode(node: PGNGameNode, indent: Int) {
             let spaces = String(repeating: " ", count: indent)
-            print(spaces + variation.currentMoveDescription() )
-            for subvariation in variation.variations.variations {
-                printVariation(variation: subvariation, indent: indent + 1)
+            print(spaces + node.currentMoveDescription )
+            for variation in node.variations {
+                printNode(node: variation, indent: indent + 1)
             }
             
         }
-        printVariation(variation: currentGame.variations.variations[0], indent: 0)
+        printNode(node: currentGame.root, indent: 0)
         games.append(currentGame)
         currentGame = PGNGame()
     }

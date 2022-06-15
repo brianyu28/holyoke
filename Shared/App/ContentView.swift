@@ -17,7 +17,7 @@ struct ContentView: View {
         ChessboardView(chessboard: chessboard)
             .onAppear {
                 let examplePGN = """
-"""
+                """
                 let games = PGNGameListener.parseGamesFromPGNString(pgn: examplePGN)
                 print(games)
                 
