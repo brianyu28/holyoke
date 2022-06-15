@@ -28,12 +28,12 @@ enum PieceType {
 }
 
 struct Piece : CustomStringConvertible {
-    let color : PlayerColor
-    let type : PieceType
+    let color: PlayerColor
+    let type: PieceType
     
     // Return piece description in FEN notation
-    var description : String {
-        let symbol : String = {
+    var description: String {
+        let symbol: String = {
             switch type {
             case .king:
                 return "K"
@@ -51,6 +51,35 @@ struct Piece : CustomStringConvertible {
         }()
         return color == .white ? symbol : symbol.lowercased()
     }
+    
+    // Returns assetname for piece
+    var assetName: String {
+        let pieceName: String = {
+            switch type {
+            case .king:
+                return "King"
+            case .queen:
+                return "Queen"
+            case .rook:
+                return "Rook"
+            case .bishop:
+                return "Bishop"
+            case .knight:
+                return "Knight"
+            case .pawn:
+                return "Pawn"
+            }
+        }()
+        let colorName: String = {
+            switch color {
+            case .white:
+                return "White"
+            case .black:
+                return "Black"
+            }
+        }()
+        return "ChessPiece_\(colorName)_\(pieceName)"
+    }
 }
 
 /**
@@ -62,12 +91,12 @@ typealias BoardSquare = (Int, Int)
  Represents a chess move.
  */
 struct Move {
-    let piece : Piece
-    let newSquare : BoardSquare
-    let isCapture : Bool
+    let piece: Piece
+    let newSquare: BoardSquare
+    let isCapture: Bool
     
     // Additional metadata for "special" moves.
-    let isCastleShort : Bool
-    let isCastleLong : Bool
-    let promotion : PieceType?
+    let isCastleShort: Bool
+    let isCastleLong: Bool
+    let promotion: PieceType?
 }

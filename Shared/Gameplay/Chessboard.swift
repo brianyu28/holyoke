@@ -13,8 +13,8 @@ import Foundation
 typealias ChessPosition = [[Piece?]]
 
 struct Chessboard : CustomStringConvertible {
-    private var position : ChessPosition
-    private var mostRecentMove : Move?
+    private var position: ChessPosition
+    private var mostRecentMove: Move?
     
     private var whiteRightToCastleKingside = true
     private var whiteRightToCastleQueenside = true
@@ -26,6 +26,14 @@ struct Chessboard : CustomStringConvertible {
     
     // Starts at 0, increases by 1 for every non-capture, non-pawn move
     private var halfmoveClock : Int
+    
+    // Returns the piece at given coordinates
+    func pieceAt(rank: Int, file: Int) -> Piece? {
+        if ((0...7).contains(rank) && (0...7).contains(file)) {
+            return position[rank][file]
+        }
+        return nil
+    }
 
     // Returns an empty chess position
     static func emptyPosition() -> ChessPosition {
@@ -83,7 +91,6 @@ struct Chessboard : CustomStringConvertible {
                 Piece(color: .white, type: .queen),
                 Piece(color: .white, type: .king),
                 Piece(color: .white, type: .bishop),
-                Piece(color: .white, type: .knight),
                 Piece(color: .white, type: .knight),
                 Piece(color: .white, type: .rook),
             ]
