@@ -28,11 +28,16 @@ class Chessboard : CustomStringConvertible {
     // Starts at 0, increases by 1 for every non-capture, non-pawn move
     private var halfmoveClock: Int
     
-    var legalMoves: [Move]
+    // Dictionary mapping move name in Algebraic Notation to move
+    var legalMoves: [String: Move]
     
     // Rank and file directions
     static private let diagionalDirections = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
     static private let horizontalDirections = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+    
+    var playerToMove: PlayerColor {
+        return mostRecentMove?.piece.color.nextColor ?? .white
+    }
     
     /**
      * Returns the piece at given coordinates.
@@ -71,7 +76,7 @@ class Chessboard : CustomStringConvertible {
         self.mostRecentMove = mostRecentMove
         self.fullmoveNumber = fullmoveNumber
         self.halfmoveClock = halfmoveClock
-        self.legalMoves = []
+        self.legalMoves = [:]
         
         self.whiteRightToCastleKingside = true
         self.whiteRightToCastleQueenside = true
@@ -246,8 +251,48 @@ class Chessboard : CustomStringConvertible {
     }
     
     func computeAndSaveLegalMoves() {
-        self.legalMoves = []
-        self.legalMoves = self.computeLegalMoves()
+        self.legalMoves = [:]
+        
+        let moveList = self.computeLegalMoves()
+        for move in moveList {
+            if move.piece.type == .pawn {
+                var moveName = ""
+                if move.isCapture {
+                    moveName += "\(move.currentSquare.fileNotation)x"
+                }
+                moveName += move.newSquare.notation
+                if let promotionType = move.promotion {
+                    moveName += "=\(promotionType.description)"
+                }
+                self.legalMoves[moveName] = move
+            } else if move.isCastleShort {
+                self.legalMoves["0-0"] = move
+            } else if move.isCastleLong {
+                self.legalMoves["0-0-0"] = move
+            } else {
+                let ambiguousMoves = moveList.filter { otherMove in
+                    move.piece.type == otherMove.piece.type &&
+                    move.newSquare.rank == otherMove.newSquare.rank &&
+                    move.newSquare.file == otherMove.newSquare.file
+                }
+                
+                var moveName = ""
+                if ambiguousMoves.count == 1 {
+                    moveName += move.piece.type.description
+                } else if (ambiguousMoves.filter { otherMove in move.currentSquare.file == otherMove.currentSquare.file }).count == 1 {
+                    moveName += move.piece.type.description + move.currentSquare.fileNotation
+                } else if (ambiguousMoves.filter { otherMove in move.currentSquare.rank == otherMove.currentSquare.rank }).count == 1 {
+                    moveName += move.piece.type.description + move.currentSquare.rankNotation
+                } else {
+                    moveName += move.piece.type.description + move.currentSquare.notation
+                }
+                if move.isCapture {
+                    moveName += "x"
+                }
+                moveName += move.newSquare.notation
+                self.legalMoves[moveName] = move
+            }
+        }
     }
     
     func isPlayerInCheck(player: PlayerColor) -> Bool {
@@ -338,7 +383,7 @@ class Chessboard : CustomStringConvertible {
         // Reset legal moves to be empty array
         var moves: [Move] = []
         
-        let playerToMove = mostRecentMove?.piece.color.nextColor ?? .white
+        let playerToMove = self.playerToMove
         let playerPieces = self.piecesForPlayer(player: playerToMove)
         
         // Check for all possible moves
@@ -531,5 +576,11 @@ class Chessboard : CustomStringConvertible {
             let tmpBoard = self.getChessboardAfterMove(move: move, computeNextLegalMoves: false)
             return !tmpBoard.isPlayerInCheck(player: move.piece.color)
         }
+    }
+    
+    func legalMovesForPieceAtSquare(square: BoardSquare) -> [Move] {
+        return Array(self.legalMoves.values.filter { move in
+            move.currentSquare == square
+        })
     }
 }

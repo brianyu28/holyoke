@@ -111,7 +111,7 @@ struct Piece : CustomStringConvertible {
 /**
  Represents a chess move as (rank, file), each in [0, 7].
  */
-struct BoardSquare: CustomStringConvertible {
+struct BoardSquare: CustomStringConvertible, Equatable, Hashable {
     let rank: Int
     let file: Int
     
@@ -123,8 +123,25 @@ struct BoardSquare: CustomStringConvertible {
         self.file = file
     }
     
+    public static func == (lhs: BoardSquare, rhs: BoardSquare) -> Bool {
+        return lhs.rank == rhs.rank && lhs.file == rhs.file
+    }
+    
+    func hash(into hasher: inout Hasher) {
+            hasher.combine(rank)
+            hasher.combine(file)
+    }
+    
+    var fileNotation: String {
+        return Self.fileMapping[self.file] ?? "?"
+    }
+    
+    var rankNotation: String {
+        return "\(8 - self.rank)"
+    }
+    
     var notation: String {
-        return "\(Self.fileMapping[self.file] ?? "?")\(8 - self.rank)"
+        return "\(fileNotation)\(rankNotation)"
     }
     
     var description: String {

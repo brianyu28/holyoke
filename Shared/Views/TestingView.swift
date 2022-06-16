@@ -15,17 +15,21 @@ struct TestingView: View {
     
     var body: some View {
         HStack {
-            ChessboardView(chessboard: document.chessboard)
-            VStack {
-                Text("Moves")
-                ForEach(document.chessboard.legalMoves) { move in
-                    Button(move.longDescription) {
-                        document.makeMoveOnBoard(move: move)
-                    }
-                    .frame(minWidth: 100, maxWidth: .infinity)
-                }
-            }
-            .padding()
+            ChessboardView(chessboard: document.chessboard, makeMove: document.makeMoveOnBoard)
+            
+//            VStack {
+//                Text("Moves")
+//                ForEach(Array(document.chessboard.legalMoves.keys.sorted()), id: \.self) { moveName in
+//                    Button(moveName) {
+//                        if let move = document.chessboard.legalMoves[moveName] {
+//                            document.makeMoveOnBoard(move: move)
+//                        }
+//                    }
+//                    .frame(minWidth: 100, maxWidth: .infinity)
+//                }
+//            }
+//            .padding()
+            
         }
     }
 }
