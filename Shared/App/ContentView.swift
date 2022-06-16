@@ -14,7 +14,7 @@ struct ContentView: View {
     var chessboard : Chessboard = Chessboard.initInDebugPosition() // TODO: don't use debug position
     
     var body: some View {
-        ChessboardView(chessboard: chessboard)
+        TestingView(chessboard: chessboard)
             .onAppear {
                 let examplePGN = """
                 """

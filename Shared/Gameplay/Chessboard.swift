@@ -12,8 +12,9 @@ import Foundation
 // Each row represents a rank, starting with the 8th rank
 typealias ChessPosition = [[Piece?]]
 
-class Chessboard : CustomStringConvertible {
-    private var position: ChessPosition
+class Chessboard : ObservableObject, CustomStringConvertible {
+    @Published
+    var position: ChessPosition
     private var mostRecentMove: Move?
     
     // Properties computed on each move
@@ -28,7 +29,8 @@ class Chessboard : CustomStringConvertible {
     // Starts at 0, increases by 1 for every non-capture, non-pawn move
     private var halfmoveClock: Int
     
-    private var legalMoves: [Move]
+    @Published
+    var legalMoves: [Move]
     
     // Rank and file directions
     static private let diagionalDirections = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
@@ -59,6 +61,10 @@ class Chessboard : CustomStringConvertible {
             }
         }
         return pieces
+    }
+    
+    func getLegalMoves() -> [Move] {
+        return self.legalMoves
     }
 
     // Returns an empty chess position
@@ -177,6 +183,32 @@ class Chessboard : CustomStringConvertible {
         return Chessboard(position: startingPosition, mostRecentMove: nil, fullmoveNumber: 1, halfmoveClock: 0)
     }
     
+    func makeMoveOnBoard(move: Move) {
+        // TODO: This function does not yet take into consideration
+        // - En Passant
+        // - Castling
+        // - Promotion
+        
+        guard let piece = self.pieceAt(rank: move.currentSquare.rank, file: move.currentSquare.file) else {
+            return
+        }
+        
+        // Make move
+        self.position[move.currentSquare.rank][move.currentSquare.file] = nil
+        self.position[move.newSquare.rank][move.newSquare.file] = piece
+        
+        // Update game data
+        self.mostRecentMove = move
+        self.fullmoveNumber = piece.color == .white ? self.fullmoveNumber : self.fullmoveNumber + 1
+        if piece.type != .pawn && !move.isCapture {
+            self.halfmoveClock += 1
+        } else {
+            self.halfmoveClock = 0
+        }
+        self.computeLegalMoves()
+        
+    }
+    
     // Checks if it is valid for a player to move a piece to a particular square
     // True if the square valid and either is empty or is occupied by the opposite player
     func isValidMovementSquare(square: BoardSquare, player: PlayerColor) -> (isValid: Bool, isCapture: Bool, wouldBeKingCapture: Bool) {
@@ -283,6 +315,9 @@ class Chessboard : CustomStringConvertible {
                         let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
                         if squareInfo.isValid {
                             self.legalMoves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: candidateSquare, isCapture: squareInfo.isCapture))
+                            if squareInfo.isCapture {
+                                break
+                            }
                             candidateSquare = BoardSquare(rank: candidateSquare.rank + rankDirection, file: candidateSquare.file + fileDirection)
                         } else {
                             break
@@ -298,6 +333,9 @@ class Chessboard : CustomStringConvertible {
                         let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
                         if squareInfo.isValid {
                             self.legalMoves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: candidateSquare, isCapture: squareInfo.isCapture))
+                            if squareInfo.isCapture {
+                                break
+                            }
                             candidateSquare = BoardSquare(rank: candidateSquare.rank + rankDirection, file: candidateSquare.file + fileDirection)
                         } else {
                             break
@@ -313,6 +351,9 @@ class Chessboard : CustomStringConvertible {
                         let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
                         if squareInfo.isValid {
                             self.legalMoves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: candidateSquare, isCapture: squareInfo.isCapture))
+                            if squareInfo.isCapture {
+                                break
+                            }
                             candidateSquare = BoardSquare(rank: candidateSquare.rank + rankDirection, file: candidateSquare.file + fileDirection)
                         } else {
                             break

@@ -20,7 +20,7 @@ struct ChessboardSquareStyle {
 }
 
 struct ChessboardView: View {
-    let chessboard: Chessboard
+    @ObservedObject var chessboard: Chessboard
     
     let squareSize: CGFloat = 80
     let squareStyle : ChessboardSquareStyle = .defaultStyle

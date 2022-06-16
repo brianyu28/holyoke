@@ -11,13 +11,28 @@
 import SwiftUI
 
 struct TestingView: View {
+    @ObservedObject var chessboard: Chessboard
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        HStack {
+            ChessboardView(chessboard: chessboard)
+            VStack {
+                Text("Moves")
+                ForEach(chessboard.getLegalMoves()) { move in
+                    Button("\(move.piece.description) \(move.currentSquare.notation)-\(move.newSquare.notation)") {
+                        chessboard.makeMoveOnBoard(move: move)
+                        print(chessboard.getLegalMoves())
+                    }
+                    .frame(minWidth: 100, maxWidth: .infinity)
+                }
+            }
+            .padding()
+        }
     }
 }
 
 struct TestingView_Previews: PreviewProvider {
     static var previews: some View {
-        TestingView()
+        TestingView(chessboard: Chessboard.initInStartingPosition())
     }
 }

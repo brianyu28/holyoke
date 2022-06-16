@@ -122,7 +122,7 @@ struct BoardSquare: CustomStringConvertible {
 /**
  Represents a chess move.
  */
-struct Move {
+struct Move: Identifiable {
     let piece: Piece
     let currentSquare: BoardSquare
     let newSquare: BoardSquare
@@ -133,6 +133,10 @@ struct Move {
     let isCastleLong: Bool
     let isEnPassant: Bool
     let promotion: PieceType?
+    
+    var id: String {
+        return "\(piece.description)\(currentSquare.notation)\(newSquare.notation)"
+    }
     
     // Initializer for normal moves
     init(piece: Piece, currentSquare: BoardSquare, newSquare: BoardSquare, isCapture: Bool) {
