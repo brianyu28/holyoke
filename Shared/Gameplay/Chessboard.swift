@@ -180,7 +180,7 @@ class Chessboard : CustomStringConvertible {
             mostRecentMove: move,
             fullmoveNumber: piece.color == .white ? self.fullmoveNumber : self.fullmoveNumber + 1,
             halfmoveClock: piece.type != .pawn && !move.isCapture ? self.halfmoveClock + 1 : 0,
-            computeLegalMoves: computeNextLegalMoves
+            computeLegalMoves: false
         )
         board.whiteRightToCastleKingside = (
             self.whiteRightToCastleKingside &&
@@ -202,6 +202,11 @@ class Chessboard : CustomStringConvertible {
             !(move.piece.color == .black && move.piece.type == .king) &&
             !(move.piece.color == .black && move.piece.type == .rook && move.currentSquare.rank == 0 && move.currentSquare.file == 0)
         )
+        
+        if (computeNextLegalMoves) {
+            board.computeAndSaveLegalMoves()
+        }
+        
         return board
     }
     
