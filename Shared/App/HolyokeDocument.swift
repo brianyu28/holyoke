@@ -15,10 +15,10 @@ extension UTType {
 }
 
 struct HolyokeDocument: FileDocument {
-    var text: String
+    var games: [PGNGame]
 
-    init(text: String = "Hello, world!") {
-        self.text = text
+    init(pgnText: String) {
+        self.games = PGNGameListener.parseGamesFromPGNString(pgn: pgnText)
     }
 
     static var readableContentTypes: [UTType] { [.exampleText] }
@@ -29,10 +29,11 @@ struct HolyokeDocument: FileDocument {
         else {
             throw CocoaError(.fileReadCorruptFile)
         }
-        text = string
+        self.games = PGNGameListener.parseGamesFromPGNString(pgn: string)
     }
     
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        let text = "Example file contents: \(games.count)" // TODO: replace with actual PGN content
         let data = text.data(using: .utf8)!
         return .init(regularFileWithContents: data)
     }

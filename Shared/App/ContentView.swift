@@ -31,6 +31,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(document: .constant(HolyokeDocument()), chessboard: Chessboard())
+        ContentView(document: .constant(HolyokeDocument(pgnText: "")), chessboard: Chessboard())
     }
 }

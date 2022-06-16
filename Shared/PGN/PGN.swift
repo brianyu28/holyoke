@@ -112,6 +112,10 @@ class PGNGameListener : PGNBaseListener {
     }
     
     static func parseGamesFromPGNString(pgn: String) -> [PGNGame] {
+        if pgn.isEmpty {
+            return [PGNGame()]
+        }
+        
         do {
             let inputStream = ANTLRInputStream(pgn)
             let lexer = PGNLexer(inputStream)
@@ -122,7 +126,7 @@ class PGNGameListener : PGNBaseListener {
             try ParseTreeWalker().walk(listener, expressionContext)
             return listener.getGames()
         } catch {
-            return []
+            return [PGNGame()]
         }
     }
     
