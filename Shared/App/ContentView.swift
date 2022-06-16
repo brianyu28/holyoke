@@ -9,12 +9,10 @@ import SwiftUI
 import Antlr4
 
 struct ContentView: View {
-    @Binding var document: HolyokeDocument
-    
-    var chessboard : Chessboard = Chessboard.initInDebugPosition() // TODO: don't use debug position
+    @ObservedObject var document: HolyokeDocument
     
     var body: some View {
-        TestingView(chessboard: chessboard)
+        TestingView(document: document)
             .onAppear {
                 let examplePGN = """
                 """
@@ -31,6 +29,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(document: .constant(HolyokeDocument(pgnText: "")), chessboard: Chessboard.initInStartingPosition())
+        ContentView(document: HolyokeDocument())
     }
 }

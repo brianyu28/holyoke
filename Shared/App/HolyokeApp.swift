@@ -10,8 +10,8 @@ import SwiftUI
 @main
 struct HolyokeApp: App {
     var body: some Scene {
-        DocumentGroup(newDocument: HolyokeDocument(pgnText: "")) { file in
-            ContentView(document: file.$document)
+        DocumentGroup(newDocument: HolyokeDocument.init) { file in
+            ContentView(document: file.document)
         }
     }
         

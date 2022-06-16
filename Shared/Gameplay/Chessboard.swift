@@ -12,16 +12,15 @@ import Foundation
 // Each row represents a rank, starting with the 8th rank
 typealias ChessPosition = [[Piece?]]
 
-class Chessboard : ObservableObject, CustomStringConvertible {
-    @Published
+class Chessboard : CustomStringConvertible {
     var position: ChessPosition
-    private var mostRecentMove: Move?
+    var mostRecentMove: Move?
     
     // Properties computed on each move
-    private var whiteRightToCastleKingside: Bool = true
-    private var whiteRightToCastleQueenside: Bool = true
-    private var blackRightToCastleKingside: Bool = true
-    private var blackRightToCastleQueenside: Bool = true
+    var whiteRightToCastleKingside: Bool = true
+    var whiteRightToCastleQueenside: Bool = true
+    var blackRightToCastleKingside: Bool = true
+    var blackRightToCastleQueenside: Bool = true
     
     // Starts at 1 on the first turn, increments after each Black turn
     private var fullmoveNumber: Int
@@ -29,7 +28,6 @@ class Chessboard : ObservableObject, CustomStringConvertible {
     // Starts at 0, increases by 1 for every non-capture, non-pawn move
     private var halfmoveClock: Int
     
-    @Published
     var legalMoves: [Move]
     
     // Rank and file directions
@@ -61,10 +59,6 @@ class Chessboard : ObservableObject, CustomStringConvertible {
             }
         }
         return pieces
-    }
-    
-    func getLegalMoves() -> [Move] {
-        return self.legalMoves
     }
 
     // Returns an empty chess position
@@ -132,81 +126,32 @@ class Chessboard : ObservableObject, CustomStringConvertible {
         return Chessboard(position: startingPosition, mostRecentMove: nil, fullmoveNumber: 1, halfmoveClock: 0)
     }
     
-    // Initialize in a sample debugging position, not for use in production
-    static func initInDebugPosition() -> Chessboard {
-        let startingPosition = [
-            [
-                Piece(color: .black, type: .rook),
-                Piece(color: .black, type: .knight),
-                Piece(color: .black, type: .bishop),
-                Piece(color: .black, type: .queen),
-                Piece(color: .black, type: .king),
-                Piece(color: .black, type: .bishop),
-                Piece(color: .black, type: .knight),
-                Piece(color: .black, type: .rook),
-            ],
-            [
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-            ],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-            ],
-            [
-                Piece(color: .white, type: .rook),
-                Piece(color: .white, type: .knight),
-                Piece(color: .white, type: .bishop),
-                Piece(color: .white, type: .queen),
-                Piece(color: .white, type: .king),
-                Piece(color: .white, type: .bishop),
-                Piece(color: .white, type: .knight),
-                Piece(color: .white, type: .rook),
-            ]
-        ]
-        return Chessboard(position: startingPosition, mostRecentMove: nil, fullmoveNumber: 1, halfmoveClock: 0)
-    }
-    
-    func makeMoveOnBoard(move: Move) {
+    func getChessboardAfterMove(move: Move) -> Chessboard {
         // TODO: This function does not yet take into consideration
         // - En Passant
         // - Castling
         // - Promotion
-        
         guard let piece = self.pieceAt(rank: move.currentSquare.rank, file: move.currentSquare.file) else {
-            return
+            return self
+        }
+        
+        var newPosition = Self.emptyPosition()
+        for rank in 0...7 {
+            for file in 0...7 {
+                newPosition[rank][file] = self.position[rank][file]
+            }
         }
         
         // Make move
-        self.position[move.currentSquare.rank][move.currentSquare.file] = nil
-        self.position[move.newSquare.rank][move.newSquare.file] = piece
+        newPosition[move.currentSquare.rank][move.currentSquare.file] = nil
+        newPosition[move.newSquare.rank][move.newSquare.file] = piece
         
-        // Update game data
-        self.mostRecentMove = move
-        self.fullmoveNumber = piece.color == .white ? self.fullmoveNumber : self.fullmoveNumber + 1
-        if piece.type != .pawn && !move.isCapture {
-            self.halfmoveClock += 1
-        } else {
-            self.halfmoveClock = 0
-        }
-        self.computeLegalMoves()
-        
+        return Chessboard(
+            position: newPosition,
+            mostRecentMove: move,
+            fullmoveNumber: piece.color == .white ? self.fullmoveNumber : self.fullmoveNumber + 1,
+            halfmoveClock: piece.type != .pawn && !move.isCapture ? self.halfmoveClock + 1 : 0
+        )
     }
     
     // Checks if it is valid for a player to move a piece to a particular square

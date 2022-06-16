@@ -11,17 +11,16 @@
 import SwiftUI
 
 struct TestingView: View {
-    @ObservedObject var chessboard: Chessboard
+    @ObservedObject var document: HolyokeDocument
     
     var body: some View {
         HStack {
-            ChessboardView(chessboard: chessboard)
+            ChessboardView(chessboard: document.chessboard)
             VStack {
                 Text("Moves")
-                ForEach(chessboard.getLegalMoves()) { move in
+                ForEach(document.chessboard.legalMoves) { move in
                     Button("\(move.piece.description) \(move.currentSquare.notation)-\(move.newSquare.notation)") {
-                        chessboard.makeMoveOnBoard(move: move)
-                        print(chessboard.getLegalMoves())
+                        document.makeMoveOnBoard(move: move)
                     }
                     .frame(minWidth: 100, maxWidth: .infinity)
                 }
@@ -33,6 +32,6 @@ struct TestingView: View {
 
 struct TestingView_Previews: PreviewProvider {
     static var previews: some View {
-        TestingView(chessboard: Chessboard.initInStartingPosition())
+        TestingView(document: HolyokeDocument())
     }
 }

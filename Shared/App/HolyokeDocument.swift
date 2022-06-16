@@ -14,11 +14,14 @@ extension UTType {
     }
 }
 
-struct HolyokeDocument: FileDocument {
-    var games: [PGNGame]
+final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
+    
+    @Published var games: [PGNGame]
+    @Published var chessboard: Chessboard
 
-    init(pgnText: String) {
-        self.games = PGNGameListener.parseGamesFromPGNString(pgn: pgnText)
+    init() {
+        self.games = PGNGameListener.parseGamesFromPGNString(pgn: "")
+        self.chessboard = Chessboard.initInStartingPosition()
     }
 
     static var readableContentTypes: [UTType] { [.exampleText] }
@@ -30,11 +33,22 @@ struct HolyokeDocument: FileDocument {
             throw CocoaError(.fileReadCorruptFile)
         }
         self.games = PGNGameListener.parseGamesFromPGNString(pgn: string)
+        self.chessboard = Chessboard.initInStartingPosition()
     }
     
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        let text = "Example file contents: \(games.count)" // TODO: replace with actual PGN content
+    func snapshot(contentType: UTType) throws -> [PGNGame] {
+        return self.games
+    }
+    
+    func fileWrapper(snapshot: [PGNGame], configuration: WriteConfiguration) throws -> FileWrapper {
+        let text = "Example file contents: \(snapshot.count)" // TODO: replace with actual PGN content
         let data = text.data(using: .utf8)!
         return .init(regularFileWithContents: data)
+    }
+    
+    // Gameplay
+    
+    func makeMoveOnBoard(move: Move) {
+        chessboard = chessboard.getChessboardAfterMove(move: move)
     }
 }
