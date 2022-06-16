@@ -196,14 +196,14 @@ struct Move: Identifiable {
         self.promotion = nil
     }
     
-    init(withPawnPromoting piece: Piece, toPiece newPiece: PieceType, onSquare newSquare: BoardSquare) {
+    init(withPawnPromoting piece: Piece, toPiece newPiece: PieceType, currentSquare: BoardSquare, newSquare: BoardSquare, isCapture: Bool) {
         if piece.type != .pawn {
             fatalError("Attempted to promote a non-pawn piece.")
         }
         self.piece = piece
-        self.currentSquare = BoardSquare(rank: piece.color == .white ? 1 : 6, file: newSquare.file)
+        self.currentSquare = currentSquare
         self.newSquare = newSquare
-        self.isCapture = false
+        self.isCapture = isCapture
         
         self.isCastleShort = false
         self.isCastleLong = false
