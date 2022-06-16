@@ -19,7 +19,7 @@ struct TestingView: View {
             VStack {
                 Text("Moves")
                 ForEach(document.chessboard.legalMoves) { move in
-                    Button("\(move.piece.description) \(move.currentSquare.notation)-\(move.newSquare.notation)") {
+                    Button(move.longDescription) {
                         document.makeMoveOnBoard(move: move)
                     }
                     .frame(minWidth: 100, maxWidth: .infinity)

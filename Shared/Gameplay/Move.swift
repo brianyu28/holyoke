@@ -34,6 +34,23 @@ enum PieceType {
     case bishop
     case knight
     case pawn
+    
+    var description: String {
+        switch self {
+        case .king:
+            return "K"
+        case .queen:
+            return "Q"
+        case .rook:
+            return "R"
+        case .bishop:
+            return "B"
+        case .knight:
+            return "N"
+        case .pawn:
+            return "P"
+        }
+    }
 }
 
 struct Piece : CustomStringConvertible {
@@ -136,6 +153,18 @@ struct Move: Identifiable {
     
     var id: String {
         return "\(piece.description)\(currentSquare.notation)\(newSquare.notation)"
+    }
+    
+    var longDescription: String {
+        if self.isCastleShort {
+            return "0-0"
+        } else if self.isCastleLong {
+            return "0-0-0"
+        } else if let promotionType = self.promotion {
+            return "\(piece.description) \(currentSquare.notation)-\(newSquare.notation)=\(promotionType.description)"
+        } else {
+            return "\(piece.description) \(currentSquare.notation)-\(newSquare.notation)"
+        }
     }
     
     // Initializer for normal moves
