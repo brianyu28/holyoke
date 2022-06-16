@@ -146,6 +146,11 @@ class Chessboard : CustomStringConvertible {
         newPosition[move.currentSquare.rank][move.currentSquare.file] = nil
         newPosition[move.newSquare.rank][move.newSquare.file] = piece
         
+        // Check for en passant
+        if move.isEnPassant {
+            newPosition[piece.color == .white ? move.newSquare.rank + 1 : move.newSquare.rank - 1][move.newSquare.file] = nil
+        }
+        
         return Chessboard(
             position: newPosition,
             mostRecentMove: move,
@@ -191,7 +196,6 @@ class Chessboard : CustomStringConvertible {
     
     func computeLegalMoves() {
         // TODO: This function does not yet take into consideration
-        // - En Passant
         // - Castling
         // - Promotion
         // - Whether move would lead to being put into check
@@ -235,6 +239,12 @@ class Chessboard : CustomStringConvertible {
                     if squareInfo.isValid && squareInfo.isCapture {
                         self.legalMoves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: capturingSquare, isCapture: true))
                     }
+                }
+                
+                // Check if En Passant is allowed
+                if (currentSquare.rank == (playerToMove == .white ? 3 : 4) && self.mostRecentMove != nil && self.mostRecentMove!.piece.type == .pawn
+                    && self.mostRecentMove!.newSquare.rank == (playerToMove == .white ? 3 : 4) && abs(self.mostRecentMove!.newSquare.file - currentSquare.file) == 1) {
+                    self.legalMoves.append(Move(withEnPassantByPawn: piece, currentSquare: currentSquare, newSquare: BoardSquare(rank: playerToMove == .white ? 2 : 5, file: self.mostRecentMove!.newSquare.file)))
                 }
                 
             case .knight:
