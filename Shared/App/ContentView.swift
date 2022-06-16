@@ -13,13 +13,6 @@ struct ContentView: View {
     
     var body: some View {
         TestingView(document: document)
-            .onAppear {
-                let examplePGN = """
-                """
-                let games = PGNGameListener.parseGamesFromPGNString(pgn: examplePGN)
-                print(games)
-                
-            }
     }
 
 //    var body: some View {

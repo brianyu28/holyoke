@@ -9,8 +9,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 extension UTType {
-    static var exampleText: UTType {
-        UTType(importedAs: "com.example.plain-text")
+    static var pgnType: UTType {
+        UTType(filenameExtension: "pgn", conformingTo: .text)!
     }
 }
 
@@ -18,13 +18,16 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     
     @Published var games: [PGNGame]
     @Published var chessboard: Chessboard
+    @Published var currentNode: PGNGameNode
 
     init() {
-        self.games = PGNGameListener.parseGamesFromPGNString(pgn: "")
+        let games = PGNGameListener.parseGamesFromPGNString(pgn: "")
+        self.games = games
         self.chessboard = Chessboard.initInStartingPosition()
+        self.currentNode = games[0].root
     }
 
-    static var readableContentTypes: [UTType] { [.exampleText] }
+    static var readableContentTypes: [UTType] { [.pgnType] }
 
     init(configuration: ReadConfiguration) throws {
         guard let data = configuration.file.regularFileContents,
@@ -32,8 +35,11 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         else {
             throw CocoaError(.fileReadCorruptFile)
         }
-        self.games = PGNGameListener.parseGamesFromPGNString(pgn: string)
+        
+        let games = PGNGameListener.parseGamesFromPGNString(pgn: string)
+        self.games = games
         self.chessboard = Chessboard.initInStartingPosition()
+        self.currentNode = games[0].root
     }
     
     func snapshot(contentType: UTType) throws -> [PGNGame] {
@@ -41,7 +47,32 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     }
     
     func fileWrapper(snapshot: [PGNGame], configuration: WriteConfiguration) throws -> FileWrapper {
-        let text = "Example file contents: \(snapshot.count)" // TODO: replace with actual PGN content
+        // TODO: replace with actual PGN content
+        var text = ""
+        for game in snapshot {
+            text += "GAME\n"
+            var node: PGNGameNode? = game.root
+            while (true) {
+                
+                guard let currentNode = node else {
+                    break
+                }
+
+                if currentNode.moveNumber != 0 {
+                    if let move = currentNode.move {
+                        text += move
+                        text += "\n"
+                    }
+                }
+                
+                if currentNode.variations.count > 0 {
+                    node = currentNode.variations[0]
+                } else {
+                    node = nil
+                }
+            }
+        }
+        
         let data = text.data(using: .utf8)!
         return .init(regularFileWithContents: data)
     }
@@ -49,6 +80,38 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     // Gameplay
     
     func makeMoveOnBoard(move: Move) {
-        chessboard = chessboard.getChessboardAfterMove(move: move)
+        
+        // Find move notation for the move
+        var moveNotation: String? = nil
+        for (notation, legalMove) in chessboard.legalMoves {
+            if move == legalMove {
+                moveNotation = notation
+            }
+        }
+        
+        // If it's not a valid move, don't allow the move to be made
+        guard let moveNotation = moveNotation else {
+            return
+        }
+
+        // Check if the move is already one of the variations in the game tree
+        var nextNode: PGNGameNode? = nil
+        for variation in currentNode.variations {
+            if variation.move == moveNotation {
+                nextNode = variation
+            }
+        }
+        
+        if let nextNode = nextNode {
+            // Found next move node, make it the current node
+            currentNode = nextNode
+            chessboard = chessboard.getChessboardAfterMove(move: move)
+        } else {
+            // Add the move as a new variation to the current node, make it the new current node
+            let newNode = currentNode.addNewVariation()
+            newNode.move = moveNotation
+            currentNode = newNode
+            chessboard = chessboard.getChessboardAfterMove(move: move)
+        }
     }
 }

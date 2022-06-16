@@ -14,21 +14,15 @@ struct TestingView: View {
     @ObservedObject var document: HolyokeDocument
     
     var body: some View {
-        HStack {
+        VStack {
             ChessboardView(chessboard: document.chessboard, makeMove: document.makeMoveOnBoard)
             
-//            VStack {
-//                Text("Moves")
-//                ForEach(Array(document.chessboard.legalMoves.keys.sorted()), id: \.self) { moveName in
-//                    Button(moveName) {
-//                        if let move = document.chessboard.legalMoves[moveName] {
-//                            document.makeMoveOnBoard(move: move)
-//                        }
-//                    }
-//                    .frame(minWidth: 100, maxWidth: .infinity)
-//                }
-//            }
-//            .padding()
+            VStack {
+                if document.currentNode.moveNumber > 0 {
+                    Text("\(document.currentNode.moveNumber)\(document.currentNode.playerColor == .white ? "." : "...") \(document.currentNode.move?.description ?? "")")
+                }
+            }
+            .padding()
             
         }
     }

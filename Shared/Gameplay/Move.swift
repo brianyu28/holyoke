@@ -53,7 +53,7 @@ enum PieceType {
     }
 }
 
-struct Piece : CustomStringConvertible {
+struct Piece : CustomStringConvertible, Equatable {
     let color: PlayerColor
     let type: PieceType
     
@@ -76,6 +76,10 @@ struct Piece : CustomStringConvertible {
             }
         }()
         return color == .white ? symbol : symbol.lowercased()
+    }
+    
+    public static func == (lhs: Piece, rhs: Piece) -> Bool {
+        return lhs.color == rhs.color && lhs.type == rhs.type
     }
     
     // Returns assetname for piece
@@ -156,7 +160,7 @@ struct BoardSquare: CustomStringConvertible, Equatable, Hashable {
 /**
  Represents a chess move.
  */
-struct Move: Identifiable {
+struct Move: Identifiable, Equatable {
     let piece: Piece
     let currentSquare: BoardSquare
     let newSquare: BoardSquare
@@ -170,6 +174,13 @@ struct Move: Identifiable {
     
     var id: String {
         return "\(piece.description)\(currentSquare.notation)\(newSquare.notation)"
+    }
+    
+    public static func == (lhs: Move, rhs: Move) -> Bool {
+        return (lhs.piece == rhs.piece && lhs.currentSquare == rhs.currentSquare && lhs.newSquare == rhs.newSquare &&
+                lhs.isCastleShort == rhs.isCastleShort && lhs.isCastleLong == rhs.isCastleLong &&
+                lhs.isEnPassant == rhs.isEnPassant && lhs.promotion == rhs.promotion)
+        
     }
     
     var longDescription: String {
