@@ -94,18 +94,116 @@ struct Piece : CustomStringConvertible {
 /**
  Represents a chess move as (rank, file), each in [0, 7].
  */
-typealias BoardSquare = (Int, Int)
+struct BoardSquare: CustomStringConvertible {
+    let rank: Int
+    let file: Int
+    
+    static let fileMapping = [0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"]
+    static let fileReverseMapping = ["a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7]
+    
+    init(rank: Int, file: Int) {
+        self.rank = rank
+        self.file = file
+    }
+    
+    var notation: String {
+        return "\(Self.fileMapping[self.file] ?? "?")\(8 - self.rank)"
+    }
+    
+    var description: String {
+        return self.notation
+    }
+    
+    var isValidSquare: Bool {
+        return self.rank >= 0 && self.rank <= 7 && self.file >= 0 && self.file <= 7
+    }
+}
 
 /**
  Represents a chess move.
  */
 struct Move {
     let piece: Piece
+    let currentSquare: BoardSquare
     let newSquare: BoardSquare
     let isCapture: Bool
     
     // Additional metadata for "special" moves.
     let isCastleShort: Bool
     let isCastleLong: Bool
+    let isEnPassant: Bool
     let promotion: PieceType?
+    
+    // Initializer for normal moves
+    init(piece: Piece, currentSquare: BoardSquare, newSquare: BoardSquare, isCapture: Bool) {
+        self.piece = piece
+        self.currentSquare = currentSquare
+        self.newSquare = newSquare
+        self.isCapture = isCapture
+        
+        self.isCastleShort = false
+        self.isCastleLong = false
+        self.isEnPassant = false
+        self.promotion = nil
+    }
+    
+    init(withPieceCastlingShort piece: Piece) {
+        if piece.type != .king {
+            fatalError("Attempt to castle short with a non-king piece.")
+        }
+        self.piece = piece
+        self.currentSquare = BoardSquare(rank: piece.color == .white ? 7 : 0, file: 4)
+        self.newSquare = BoardSquare(rank: piece.color == .white ? 7 : 0, file: 6)
+        self.isCapture = false
+        
+        self.isCastleShort = true
+        self.isCastleLong = false
+        self.isEnPassant = false
+        self.promotion = nil
+    }
+    
+    init(withPieceCastlingLong piece: Piece) {
+        if piece.type != .king {
+            fatalError("Attempt to castle short with a non-king piece.")
+        }
+        self.piece = piece
+        self.currentSquare = BoardSquare(rank: piece.color == .white ? 7 : 0, file: 4)
+        self.newSquare = BoardSquare(rank: piece.color == .white ? 7 : 0, file: 2)
+        self.isCapture = false
+        
+        self.isCastleShort = false
+        self.isCastleLong = true
+        self.isEnPassant = false
+        self.promotion = nil
+    }
+    
+    init(withEnPassantByPawn piece: Piece, currentSquare: BoardSquare, newSquare: BoardSquare) {
+        if piece.type != .pawn {
+            fatalError("Attempt to en passant with a non-pawn piece.")
+        }
+        self.piece = piece
+        self.currentSquare = currentSquare
+        self.newSquare = newSquare
+        self.isCapture = true
+        
+        self.isCastleShort = false
+        self.isCastleLong = false
+        self.isEnPassant = true
+        self.promotion = nil
+    }
+    
+    init(withPawnPromoting piece: Piece, toPiece newPiece: PieceType, onSquare newSquare: BoardSquare) {
+        if piece.type != .pawn {
+            fatalError("Attempted to promote a non-pawn piece.")
+        }
+        self.piece = piece
+        self.currentSquare = BoardSquare(rank: piece.color == .white ? 1 : 6, file: newSquare.file)
+        self.newSquare = newSquare
+        self.isCapture = false
+        
+        self.isCastleShort = false
+        self.isCastleLong = false
+        self.isEnPassant = false
+        self.promotion = newPiece
+    }
 }

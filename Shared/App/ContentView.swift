@@ -11,7 +11,7 @@ import Antlr4
 struct ContentView: View {
     @Binding var document: HolyokeDocument
     
-    var chessboard : Chessboard = Chessboard()
+    var chessboard : Chessboard = Chessboard.initInDebugPosition() // TODO: don't use debug position
     
     var body: some View {
         ChessboardView(chessboard: chessboard)
@@ -31,6 +31,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(document: .constant(HolyokeDocument(pgnText: "")), chessboard: Chessboard())
+        ContentView(document: .constant(HolyokeDocument(pgnText: "")), chessboard: Chessboard.initInStartingPosition())
     }
 }

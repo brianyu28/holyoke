@@ -53,6 +53,6 @@ struct ChessboardView: View {
 
 struct ChessboardView_Previews: PreviewProvider {
     static var previews: some View {
-        ChessboardView(chessboard: Chessboard())
+        ChessboardView(chessboard: Chessboard.initInStartingPosition())
     }
 }
