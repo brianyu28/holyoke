@@ -29,6 +29,60 @@ class PGNGame {
         root = PGNGameNode(parent: nil)
         gameTermination = .asterisk
     }
+    
+    func generatePGNText() -> String {
+        var pgnString = ""
+        for tag in metadata {
+            pgnString += "[\(tag.field) \"\(tag.value.replacingOccurrences(of: "\"", with: "\\\""))\"]\n"
+        }
+        pgnString += "\n"
+        
+
+        func generateVariationPGNs(node: PGNGameNode?, includingMoveNumber: Bool) -> String {
+            
+            var currentNode: PGNGameNode? = node
+            
+            var requireNumber: Bool = includingMoveNumber
+            var pgnString: String = ""
+            
+            while (true) {
+                guard let n = currentNode else {
+                    break
+                }
+                
+                if n.variations.count >= 1 {
+                    
+                    let showMoveNumber = n.variations[0].playerColor == .white || requireNumber
+                    requireNumber = false
+                    
+                    pgnString += n.variations[0].pgnNotation(withMoveNumber: showMoveNumber)
+                    if !n.variations[0].braceComment.isEmpty {
+                        requireNumber = true
+                    }
+                
+                    if n.variations.count > 1 {
+                        for variation in n.variations.dropFirst() {
+                            pgnString += "( "
+                            pgnString += variation.pgnNotation(withMoveNumber: true)
+                            pgnString += generateVariationPGNs(node: variation, includingMoveNumber: !variation.braceComment.isEmpty)
+                            pgnString += ") "
+                        }
+                        
+                        requireNumber = true
+                    }
+                    currentNode = n.variations[0]
+                } else {
+                    currentNode = nil
+                }
+
+            }
+            
+            return pgnString
+        }
+        
+        pgnString += generateVariationPGNs(node: self.root, includingMoveNumber: false) + self.gameTermination.rawValue + "\n"
+        return pgnString
+    }
 }
 
 /**
@@ -89,6 +143,26 @@ class PGNGameNode {
         self.variations.append(variation)
         return variation
     }
+    
+    func pgnNotation(withMoveNumber: Bool) -> String {
+        var pgn = ""
+        if withMoveNumber {
+            if playerColor == .white {
+                pgn += "\(moveNumber). "
+            } else {
+                pgn += "\(moveNumber)... "
+            }
+        }
+        
+        pgn += (move == "0-0" ? "O-O" : move == "0-0-0" ? "O-O-O" : move) ?? "?"
+        pgn += annotations
+        pgn += " "
+        
+        if !braceComment.isEmpty {
+            pgn += "{ \(braceComment.replacingOccurrences(of: "{", with: "(").replacingOccurrences(of: "}", with: ")")) } "
+        }
+        return pgn
+    }
 }
 
 enum PGNGameTermination: String {
@@ -138,14 +212,21 @@ class PGNGameListener : PGNBaseListener {
     override func exitTag_pair(_ ctx: PGNParser.Tag_pairContext) {
         if let tag_name = ctx.tag_name()?.SYMBOL(), let tag_value = ctx.tag_value()?.STRING() {
             let name = tag_name.getText()
-            let value = String(tag_value.getText().dropFirst().dropLast())
+            let value = String(tag_value.getText().dropFirst().dropLast()).replacingOccurrences(of: "\\\"", with: "\"")
             currentGame.metadata.append((field: name, value: value))
         }
     }
     
     override func exitElement(_ ctx: PGNParser.ElementContext) {
         if let san_move = ctx.san_move() {
-            let moveText = san_move.getText() // TODO: Separate move from move annotation.
+            var moveText = san_move.getText() // TODO: Separate move from move annotation.
+            
+            // PGN uses O-O (the letter), FIDE algebraic notation uses 0-0 (the number)
+            if moveText == "O-O" {
+                moveText = "0-0"
+            } else if moveText == "O-O-O" {
+                moveText = "0-0-0"
+            }
             
             if let node = variationStack.last {
                 if let _ = node.move {
@@ -203,6 +284,7 @@ class PGNGameListener : PGNBaseListener {
             
         }
         printNode(node: currentGame.root, indent: 0)
+        
         games.append(currentGame)
         currentGame = PGNGame()
     }

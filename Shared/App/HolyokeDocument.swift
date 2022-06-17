@@ -47,32 +47,11 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     }
     
     func fileWrapper(snapshot: [PGNGame], configuration: WriteConfiguration) throws -> FileWrapper {
-        // TODO: replace with actual PGN content
         var text = ""
         for game in snapshot {
-            text += "GAME\n"
-            var node: PGNGameNode? = game.root
-            while (true) {
-                
-                guard let currentNode = node else {
-                    break
-                }
-
-                if currentNode.moveNumber != 0 {
-                    if let move = currentNode.move {
-                        text += move
-                        text += "\n"
-                    }
-                }
-                
-                if currentNode.variations.count > 0 {
-                    node = currentNode.variations[0]
-                } else {
-                    node = nil
-                }
-            }
+            text += game.generatePGNText()
+            text += "\n"
         }
-        
         let data = text.data(using: .utf8)!
         return .init(regularFileWithContents: data)
     }
