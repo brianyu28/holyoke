@@ -16,6 +16,7 @@ struct TestingView: View {
     var body: some View {
         VStack {
             ChessboardView(chessboard: document.chessboard, makeMove: document.makeMoveOnBoard)
+            GameControlsView(document: document)
             
             VStack {
                 if document.currentNode.moveNumber > 0 {

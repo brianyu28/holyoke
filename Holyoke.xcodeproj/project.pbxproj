@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D3350F76285CD3A60025EE11 /* GameControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3350F75285CD3A60025EE11 /* GameControlsView.swift */; };
+		D3350F77285CD3A60025EE11 /* GameControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3350F75285CD3A60025EE11 /* GameControlsView.swift */; };
 		D357114D285A024C002C0CC1 /* PGNListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3571149285A024C002C0CC1 /* PGNListener.swift */; };
 		D357114E285A024C002C0CC1 /* PGNListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3571149285A024C002C0CC1 /* PGNListener.swift */; };
 		D357114F285A024C002C0CC1 /* PGNLexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D357114A285A024C002C0CC1 /* PGNLexer.swift */; };
@@ -65,6 +67,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D3350F75285CD3A60025EE11 /* GameControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameControlsView.swift; sourceTree = "<group>"; };
 		D3571149285A024C002C0CC1 /* PGNListener.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PGNListener.swift; sourceTree = "<group>"; };
 		D357114A285A024C002C0CC1 /* PGNLexer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PGNLexer.swift; sourceTree = "<group>"; };
 		D357114B285A024C002C0CC1 /* PGNBaseListener.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PGNBaseListener.swift; sourceTree = "<group>"; };
@@ -198,6 +201,7 @@
 			children = (
 				D3CFE31C28596C6C00E25606 /* ChessboardView.swift */,
 				D3CFE321285972AB00E25606 /* TestingView.swift */,
+				D3350F75285CD3A60025EE11 /* GameControlsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -325,6 +329,7 @@
 				D357114F285A024C002C0CC1 /* PGNLexer.swift in Sources */,
 				D3CFE31D28596C6C00E25606 /* ChessboardView.swift in Sources */,
 				D3B468D2285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
+				D3350F76285CD3A60025EE11 /* GameControlsView.swift in Sources */,
 				D3B468D0285174A600A97CC1 /* HolyokeApp.swift in Sources */,
 				D3B468D4285174A600A97CC1 /* ContentView.swift in Sources */,
 				D3571153285A024C002C0CC1 /* PGNParser.swift in Sources */,
@@ -344,6 +349,7 @@
 				D3571150285A024C002C0CC1 /* PGNLexer.swift in Sources */,
 				D3CFE31E28596C6C00E25606 /* ChessboardView.swift in Sources */,
 				D384C79128558B5200E9357F /* Chessboard.swift in Sources */,
+				D3350F77285CD3A60025EE11 /* GameControlsView.swift in Sources */,
 				D3B468D1285174A600A97CC1 /* HolyokeApp.swift in Sources */,
 				D3571154285A024C002C0CC1 /* PGNParser.swift in Sources */,
 				D3CFE323285972AB00E25606 /* TestingView.swift in Sources */,

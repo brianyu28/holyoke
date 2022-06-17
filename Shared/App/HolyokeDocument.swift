@@ -93,4 +93,56 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
             chessboard = chessboard.getChessboardAfterMove(move: move)
         }
     }
+    
+    // Controls
+    
+    func resetChessboardToNode(node: PGNGameNode) {
+        var nodes: [PGNGameNode] = []
+        
+        // Loop through nodes to get to parent
+        var cursor: PGNGameNode? = node
+        while (cursor != nil) {
+            nodes.append(cursor!)
+            cursor = cursor!.parent
+        }
+        
+        var board = Chessboard.initInStartingPosition()
+        for node in nodes.reversed() {
+            if node.moveNumber == 0 {
+                continue
+            }
+            guard let move = board.legalMoves[node.move ?? ""] else {
+                break
+            }
+            board = board.getChessboardAfterMove(move: move)
+        }
+        chessboard = board
+        currentNode = node
+        
+    }
+    
+    func nextMove() {
+        
+        // If there are no more moves to make, return
+        if currentNode.variations.count == 0 {
+            return
+        }
+        
+        // TODO: allow selecting a variation based on the currently selected line
+        let variation = currentNode.variations[0]
+        guard let move = chessboard.legalMoves[variation.move ?? ""] else {
+            return
+        }
+        currentNode = variation
+        chessboard = chessboard.getChessboardAfterMove(move: move)
+    }
+    
+    func previousMove() {
+        // If there's no previous move, stop
+        guard let node = currentNode.parent else {
+            return
+        }
+        
+        self.resetChessboardToNode(node: node)
+    }
 }
