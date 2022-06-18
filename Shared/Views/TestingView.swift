@@ -14,18 +14,29 @@ struct TestingView: View {
     @ObservedObject var document: HolyokeDocument
     
     var body: some View {
-        VStack {
-            ChessboardView(chessboard: document.chessboard, makeMove: document.makeMoveOnBoard)
-            GameControlsView(document: document)
+        HStack {
             
+            // Chessboard and Controls
             VStack {
-                if document.currentNode.moveNumber > 0 {
-                    Text("\(document.currentNode.moveNumber)\(document.currentNode.playerColor == .white ? "." : "...") \(document.currentNode.move?.description ?? "")")
+                ChessboardView(chessboard: document.chessboard, makeMove: document.makeMoveOnBoard)
+                GameControlsView(document: document)
+                
+                VStack {
+                    if document.currentNode.moveNumber > 0 {
+                        Text("\(document.currentNode.moveNumber)\(document.currentNode.playerColor == .white ? "." : "...") \(document.currentNode.move?.description ?? "")")
+                    }
                 }
+                .padding()
+                
             }
-            .padding()
             
+            // PGN View, move details, variations
+            VStack {
+                GameTreeView(document: document)
+                MoveDetailView(document: document)
+            }
         }
+        
     }
 }
 
