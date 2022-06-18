@@ -30,6 +30,75 @@ class PGNGame {
         gameTermination = .asterisk
     }
     
+    func generateNodeLayout() -> (layout: [[PGNGameNode?]], locations: [Int: Int]) {
+        
+        // 2D array of (row, col) for where PGNGameNodes are laid out
+        var layout: [[PGNGameNode?]] = []
+        
+        // Mapping from PGNGameNode ID -> row index in the final game layout
+        var locations: [Int: Int] = [:]
+        
+        // Add node to layout with a minimum row, return its actual row
+        func addNode(node: PGNGameNode, startingAtRowIndex startRow: Int) -> Int {
+            let col: Int = node.layoutColumn
+            var row: Int = startRow
+            
+            while (true) {
+                // Ensure that locations has enough rows
+                while layout.count <= row {
+                    layout.append([])
+                }
+                
+                while layout[row].count <= col {
+                    layout[row].append(nil)
+                }
+                
+                if layout[row][col] == nil {
+                    // There's space at the desired row
+                    layout[row][col] = node
+                    locations[node.id] = row
+                    return row
+                } else {
+                    row += 1
+                }
+            }
+        }
+        
+        func addVariation(node startNode: PGNGameNode, startingAtRowIndex startRow: Int) {
+            
+            // Keep track of nodes, so we can add variations later
+            var nodes: [PGNGameNode] = []
+            var currentRowIndex = startRow
+            
+            // Loop through all of the moves, adding each where it fits
+            var node: PGNGameNode? = startNode
+            while (true) {
+                guard let n = node else {
+                    break
+                }
+                nodes.append(n)
+                currentRowIndex = addNode(node: n, startingAtRowIndex: currentRowIndex)
+                
+                if n.variations.count == 0 {
+                    break
+                }
+                node = n.variations[0]
+            }
+            
+            // Go through and add variations
+            for node in nodes.reversed() {
+                for variation in node.variations.dropFirst() {
+                    addVariation(node: variation, startingAtRowIndex: (locations[node.id] ?? 0) + 1)
+                }
+            }
+            
+        }
+        
+        addVariation(node: self.root, startingAtRowIndex: 0)
+        
+        return (layout: layout, locations: locations)
+    }
+    
     func generatePGNText() -> String {
         var pgnString = ""
         for tag in metadata {
@@ -88,7 +157,11 @@ class PGNGame {
 /**
  Represents a node in a game tree.
  */
-class PGNGameNode: Identifiable {
+class PGNGameNode: Identifiable, Equatable {
+    // Incremenets to keep track of unique game node IDs
+    static private var inc: Int = 0
+
+    let id: Int
     let moveNumber: Int
     let playerColor: PlayerColor
     
@@ -108,6 +181,9 @@ class PGNGameNode: Identifiable {
     var selectedVariationIndex: Int?
     
     init(parent: PGNGameNode?) {
+        Self.inc += 1
+        self.id = Self.inc
+        
         self.moveNumber = parent?.nextMoveNumber ?? 0
         self.playerColor = parent?.playerColor.nextColor ?? .black
         self.variations = []
@@ -125,8 +201,9 @@ class PGNGameNode: Identifiable {
         self.selectedVariationIndex = nil
     }
     
-    var id: String {
-        return (move ?? "") + (self.parent != nil ? self.parent!.id : "")
+    public static func == (lhs: PGNGameNode, rhs: PGNGameNode) -> Bool {
+        return lhs.id == rhs.id
+        
     }
     
     // If current player is White, next move is the same move number
@@ -136,6 +213,25 @@ class PGNGameNode: Identifiable {
             return moveNumber
         case .black:
             return moveNumber + 1
+        }
+    }
+    
+    var mainlineLength: Int {
+        if self.variations.count > 0 {
+            return 1 + self.variations[0].mainlineLength
+        } else {
+            return 1
+        }
+    }
+    
+    // In a layout of all nodes, what column should this node be in
+    // This is determined by the node's move number and color
+    var layoutColumn: Int {
+        switch playerColor {
+        case .white:
+            return moveNumber * 2 - 1
+        case .black:
+            return moveNumber * 2
         }
     }
     

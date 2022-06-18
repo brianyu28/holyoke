@@ -25,7 +25,7 @@ struct TestingView: View {
             
             // PGN View, move details, variations
             VStack {
-                GameTreeView(document: document)
+                GameTreeView(document: document, tree: document.currentGame.generateNodeLayout())
                 MoveDetailView(document: document)
             }
         }

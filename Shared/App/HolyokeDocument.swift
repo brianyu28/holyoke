@@ -18,16 +18,22 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     
     @Published var games: [PGNGame]
     @Published var chessboard: Chessboard
+    @Published var currentGameIndex: Int
     @Published var currentNode: PGNGameNode
 
     init() {
         let games = PGNGameListener.parseGamesFromPGNString(pgn: "")
+        let currentGameIndex = 0
+        
         self.games = games
         self.chessboard = Chessboard.initInStartingPosition()
-        self.currentNode = games[0].root
+        self.currentGameIndex = currentGameIndex
+        self.currentNode = games[currentGameIndex].root
     }
 
     static var readableContentTypes: [UTType] { [.pgnType] }
+    
+    var currentGame: PGNGame { games[currentGameIndex] }
 
     init(configuration: ReadConfiguration) throws {
         guard let data = configuration.file.regularFileContents,
@@ -37,9 +43,12 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         }
         
         let games = PGNGameListener.parseGamesFromPGNString(pgn: string)
+        let currentGameIndex = 0
+        
         self.games = games
         self.chessboard = Chessboard.initInStartingPosition()
-        self.currentNode = games[0].root
+        self.currentGameIndex = currentGameIndex
+        self.currentNode = games[currentGameIndex].root
     }
     
     func snapshot(contentType: UTType) throws -> [PGNGame] {
