@@ -18,12 +18,14 @@ struct GameControlsView: View {
             } label: {
                 Image(systemName: "arrow.left")
             }
+            .keyboardShortcut(.leftArrow, modifiers: [])
             
             Button {
                 document.nextMove()
             } label: {
                 Image(systemName: "arrow.right")
             }
+            .keyboardShortcut(.rightArrow, modifiers: [])
         }
     }
 }

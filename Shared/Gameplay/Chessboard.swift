@@ -255,6 +255,16 @@ class Chessboard : CustomStringConvertible {
         
         let moveList = self.computeLegalMoves()
         for move in moveList {
+            
+            var suffix = ""
+            let board = self.getChessboardAfterMove(move: move, computeNextLegalMoves: false)
+            if board.isPlayerInCheck(player: board.playerToMove) {
+                if board.isPlayerInCheckmate(player: board.playerToMove) {
+                    suffix = "#"
+                } else {
+                    suffix = "+"
+                }
+            }
             if move.piece.type == .pawn {
                 var moveName = ""
                 if move.isCapture {
@@ -264,11 +274,11 @@ class Chessboard : CustomStringConvertible {
                 if let promotionType = move.promotion {
                     moveName += "=\(promotionType.description)"
                 }
-                self.legalMoves[moveName] = move
+                self.legalMoves[moveName + suffix] = move
             } else if move.isCastleShort {
-                self.legalMoves["0-0"] = move
+                self.legalMoves["0-0" + suffix] = move
             } else if move.isCastleLong {
-                self.legalMoves["0-0-0"] = move
+                self.legalMoves["0-0-0" + suffix] = move
             } else {
                 let ambiguousMoves = moveList.filter { otherMove in
                     move.piece.type == otherMove.piece.type &&
@@ -290,7 +300,7 @@ class Chessboard : CustomStringConvertible {
                     moveName += "x"
                 }
                 moveName += move.newSquare.notation
-                self.legalMoves[moveName] = move
+                self.legalMoves[moveName + suffix] = move
             }
         }
     }
@@ -376,6 +386,27 @@ class Chessboard : CustomStringConvertible {
         }
         
         return false
+    }
+    
+    func isPlayerInCheckmate(player: PlayerColor) -> Bool {
+        // It must be the player's turn to be in checkmate
+        if self.playerToMove != player {
+            return false
+        }
+        
+        // Player must be in check to be in checkmate
+        if !self.isPlayerInCheck(player: player) {
+            return false
+        }
+        
+        // If player has existing legal moves, they're not in checkmate
+        if !self.legalMoves.isEmpty {
+            return false
+        }
+        
+        // Otherwise, compute moves in case they weren't already computed
+        self.computeAndSaveLegalMoves()
+        return self.legalMoves.isEmpty
     }
     
     func computeLegalMoves() -> [Move] {

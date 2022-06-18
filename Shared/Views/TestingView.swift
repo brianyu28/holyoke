@@ -20,14 +20,7 @@ struct TestingView: View {
             VStack {
                 ChessboardView(chessboard: document.chessboard, makeMove: document.makeMoveOnBoard)
                 GameControlsView(document: document)
-                
-                VStack {
-                    if document.currentNode.moveNumber > 0 {
-                        Text("\(document.currentNode.moveNumber)\(document.currentNode.playerColor == .white ? "." : "...") \(document.currentNode.move?.description ?? "")")
-                    }
-                }
-                .padding()
-                
+                Text(document.currentNode.moveSequenceUntilCurrentNode())
             }
             
             // PGN View, move details, variations

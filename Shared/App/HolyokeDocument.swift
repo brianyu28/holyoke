@@ -83,12 +83,14 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         
         if let nextNode = nextNode {
             // Found next move node, make it the current node
+            currentNode.setSelectedVariation(variation: nextNode)
             currentNode = nextNode
             chessboard = chessboard.getChessboardAfterMove(move: move)
         } else {
             // Add the move as a new variation to the current node, make it the new current node
             let newNode = currentNode.addNewVariation()
             newNode.move = moveNotation
+            currentNode.setSelectedVariation(variation: newNode)
             currentNode = newNode
             chessboard = chessboard.getChessboardAfterMove(move: move)
         }
@@ -111,6 +113,9 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
             if node.moveNumber == 0 {
                 continue
             }
+            if let parent = node.parent {
+                parent.setSelectedVariation(variation: node)
+            }
             guard let move = board.legalMoves[node.move ?? ""] else {
                 break
             }
@@ -128,8 +133,12 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
             return
         }
         
-        // TODO: allow selecting a variation based on the currently selected line
-        let variation = currentNode.variations[0]
+        // If there's a selected variation, make sure it's valid
+        if currentNode.selectedVariationIndex ?? 0 >= currentNode.variations.count {
+            currentNode.selectedVariationIndex = nil
+        }
+        
+        let variation = currentNode.variations[currentNode.selectedVariationIndex ?? 0]
         guard let move = chessboard.legalMoves[variation.move ?? ""] else {
             return
         }

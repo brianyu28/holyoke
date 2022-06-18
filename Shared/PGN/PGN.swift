@@ -55,7 +55,7 @@ class PGNGame {
                     let showMoveNumber = n.variations[0].playerColor == .white || requireNumber
                     requireNumber = false
                     
-                    pgnString += n.variations[0].pgnNotation(withMoveNumber: showMoveNumber)
+                    pgnString += n.variations[0].pgnNotation(withMoveNumber: showMoveNumber, withComments: true)
                     if !n.variations[0].braceComment.isEmpty {
                         requireNumber = true
                     }
@@ -63,7 +63,7 @@ class PGNGame {
                     if n.variations.count > 1 {
                         for variation in n.variations.dropFirst() {
                             pgnString += "( "
-                            pgnString += variation.pgnNotation(withMoveNumber: true)
+                            pgnString += variation.pgnNotation(withMoveNumber: true, withComments: true)
                             pgnString += generateVariationPGNs(node: variation, includingMoveNumber: !variation.braceComment.isEmpty)
                             pgnString += ") "
                         }
@@ -88,7 +88,7 @@ class PGNGame {
 /**
  Represents a node in a game tree.
  */
-class PGNGameNode {
+class PGNGameNode: Identifiable {
     let moveNumber: Int
     let playerColor: PlayerColor
     
@@ -101,6 +101,12 @@ class PGNGameNode {
     var restOfLineComment : String
     var annotations : String
     
+    var isCheck: Bool
+    var isCheckmate: Bool
+    
+    // Which of the variations is "selected"; that is, should be chosen when we go to the next move
+    var selectedVariationIndex: Int?
+    
     init(parent: PGNGameNode?) {
         self.moveNumber = parent?.nextMoveNumber ?? 0
         self.playerColor = parent?.playerColor.nextColor ?? .black
@@ -112,6 +118,15 @@ class PGNGameNode {
         self.braceComment = ""
         self.restOfLineComment = ""
         self.annotations = ""
+        
+        self.isCheck = false
+        self.isCheckmate = false
+        
+        self.selectedVariationIndex = nil
+    }
+    
+    var id: String {
+        return (move ?? "") + (self.parent != nil ? self.parent!.id : "")
     }
     
     // If current player is White, next move is the same move number
@@ -124,15 +139,21 @@ class PGNGameNode {
         }
     }
     
-    var currentMoveDescription: String {
-        return "\(moveNumber)\(playerColor == .white ? "." : "...") \(move ?? "--") \(braceComment != "" ? "{\(braceComment)}" : "")"
-    }
-    
     /**
      Add an existing node as a child of the node.
      */
     func addVariation(variation: PGNGameNode) {
         self.variations.append(variation)
+    }
+    
+    func setSelectedVariation(variation: PGNGameNode) {
+        self.selectedVariationIndex = nil
+        for (i, possibleVariation) in self.variations.enumerated() {
+            if possibleVariation.move == variation.move {
+                self.selectedVariationIndex = i
+                break
+            }
+        }
     }
     
     /**
@@ -144,7 +165,7 @@ class PGNGameNode {
         return variation
     }
     
-    func pgnNotation(withMoveNumber: Bool) -> String {
+    func pgnNotation(withMoveNumber: Bool, withComments: Bool) -> String {
         var pgn = ""
         if withMoveNumber {
             if playerColor == .white {
@@ -155,13 +176,30 @@ class PGNGameNode {
         }
         
         pgn += (move == "0-0" ? "O-O" : move == "0-0-0" ? "O-O-O" : move) ?? "?"
+        if self.isCheckmate {
+            pgn += "#"
+        } else if self.isCheck {
+            pgn += "+"
+        }
         pgn += annotations
         pgn += " "
         
-        if !braceComment.isEmpty {
+        if withComments && !braceComment.isEmpty {
             pgn += "{ \(braceComment.replacingOccurrences(of: "{", with: "(").replacingOccurrences(of: "}", with: ")")) } "
         }
         return pgn
+    }
+    
+    func moveSequenceUntilCurrentNode() -> String {
+        if self.moveNumber == 0 {
+            return ""
+        }
+        let currentMove = self.pgnNotation(withMoveNumber: self.playerColor == .white, withComments: false)
+        if let parent = self.parent {
+            return parent.moveSequenceUntilCurrentNode() + " " + currentMove
+        } else {
+            return currentMove
+        }
     }
 }
 
@@ -177,6 +215,8 @@ class PGNGameListener : PGNBaseListener {
     private var games: [PGNGame]
     private var currentGame: PGNGame
     private var variationStack: [PGNGameNode]
+    
+    static let possibleAnnotationSymbols = ["!!", "!?", "?!", "??", "!", "?"]
     
     override init() {
         games = []
@@ -219,7 +259,17 @@ class PGNGameListener : PGNBaseListener {
     
     override func exitElement(_ ctx: PGNParser.ElementContext) {
         if let san_move = ctx.san_move() {
-            var moveText = san_move.getText() // TODO: Separate move from move annotation.
+            var moveText = san_move.getText()
+            var annotation = ""
+            
+            // Only six possible annotation symbols
+            for possibleAnnotationSymbol in Self.possibleAnnotationSymbols {
+                if moveText.hasSuffix(possibleAnnotationSymbol) {
+                    moveText = moveText.replacingOccurrences(of: possibleAnnotationSymbol, with: "")
+                    annotation = possibleAnnotationSymbol
+                    break
+                }
+            }
             
             // PGN uses O-O (the letter), FIDE algebraic notation uses 0-0 (the number)
             if moveText == "O-O" {
@@ -233,11 +283,13 @@ class PGNGameListener : PGNBaseListener {
                     // Node already has a move, add this element as a child
                     let newNode = node.addNewVariation()
                     newNode.move = moveText
+                    newNode.annotations = annotation
                     variationStack.removeLast()
                     variationStack.append(newNode)
                 } else {
                     // Node doesn't have a move, add the move to this node
                     node.move = moveText
+                    node.annotations = annotation
                 }
             }
         } else if let braceComment = ctx.BRACE_COMMENT() {
@@ -274,17 +326,6 @@ class PGNGameListener : PGNBaseListener {
     }
     
     override func exitPgn_game(_ ctx: PGNParser.Pgn_gameContext) {
-        
-        func printNode(node: PGNGameNode, indent: Int) {
-            let spaces = String(repeating: " ", count: indent)
-            print(spaces + node.currentMoveDescription )
-            for variation in node.variations {
-                printNode(node: variation, indent: indent + 1)
-            }
-            
-        }
-        printNode(node: currentGame.root, indent: 0)
-        
         games.append(currentGame)
         currentGame = PGNGame()
     }
