@@ -19,17 +19,46 @@ struct GameTreeView: View {
     
     var body: some View {
         ZStack {
-            ForEach(0...(tree.layout.count - 1), id:\.self) { rowIndex in
-                ForEach(0...(tree.layout[rowIndex].count - 1), id: \.self) { colIndex in
-                    if let node = tree.layout[rowIndex][colIndex] {
+            
+            ForEach(0...(tree.layout.count - 1), id:\.self) { (rowIndex: Int) in
+                ForEach(0...(tree.layout[rowIndex].count - 1), id: \.self) { (colIndex: Int) in
+                    if let node: PGNGameNode = tree.layout[rowIndex][colIndex] {
+                        ForEach(node.variations) { (variation: PGNGameNode) in
+                            if let variationRow = tree.locations[variation.id] {
+                                
+                                Path { path in
+                                    path.move(to: CGPoint(x: CGFloat(colIndex) * 15.0 + 5.0, y: CGFloat(rowIndex) * 15.0 + 5.0))
+                                    path.addLine(to: CGPoint(x: CGFloat(colIndex) * 15.0 + 5.0, y: CGFloat(variationRow) * 15.0 + 5.0))
+                                }
+                                .stroke(.black, lineWidth: 1)
+                                
+                                Path { path in
+                                    path.move(to: CGPoint(x: CGFloat(colIndex) * 15.0 + 5.0, y: CGFloat(variationRow) * 15.0 + 5.0))
+                                    path.addLine(to: CGPoint(x: CGFloat(colIndex + 1) * 15.0 + 5.0, y: CGFloat(variationRow) * 15.0 + 5.0))
+                                }
+                                .stroke(.black, lineWidth: 1)
+                                
+                            }
+                        }
+                    }
+                }
+            }
+            
+            ForEach(0...(tree.layout.count - 1), id:\.self) { (rowIndex: Int) in
+                ForEach(0...(tree.layout[rowIndex].count - 1), id: \.self) { (colIndex: Int) in
+                    if let node: PGNGameNode = tree.layout[rowIndex][colIndex] {
                         Circle()
                             .size(width: 10, height: 10)
                             .foregroundColor(node == document.currentNode ? .blue : .black)
                             .offset(x: CGFloat(colIndex) * 15.0, y: CGFloat(rowIndex) * 15.0)
+                            .onTapGesture {
+                                document.resetChessboardToNode(node: node)
+                            }
                     }
                 }
             }
         }
+        .padding()
     }
 }
 

@@ -8,6 +8,17 @@
 import Foundation
 import Antlr4
 
+
+// Location for where a PGNGameNode should be placed
+struct GameLayoutPoint: Hashable, Equatable {
+    let row: Int
+    let col: Int
+    
+    public static func == (lhs: GameLayoutPoint, rhs: GameLayoutPoint) -> Bool {
+        return lhs.row == rhs.row && lhs.col == rhs.col
+    }
+}
+
 class PGNGame {
     /**
      Game metadata. Standard game metadata includes "Event", "Site", "Date", "Round", "White", "Black", "Result"
@@ -38,6 +49,8 @@ class PGNGame {
         // Mapping from PGNGameNode ID -> row index in the final game layout
         var locations: [Int: Int] = [:]
         
+        var avoid: Set<GameLayoutPoint> = []
+        
         // Add node to layout with a minimum row, return its actual row
         func addNode(node: PGNGameNode, startingAtRowIndex startRow: Int) -> Int {
             let col: Int = node.layoutColumn
@@ -53,10 +66,20 @@ class PGNGame {
                     layout[row].append(nil)
                 }
                 
-                if layout[row][col] == nil {
+                if layout[row][col] == nil && !avoid.contains(GameLayoutPoint(row: row, col: col)) {
                     // There's space at the desired row
                     layout[row][col] = node
                     locations[node.id] = row
+                    
+                    // Avoid placing nodes between the parent and this node
+                    if let parentRow = node.parent != nil ? locations[node.parent!.id] : nil {
+                        if parentRow <= row {
+                            for r in parentRow...row {
+                                avoid.insert(GameLayoutPoint(row: r, col: col - 1))
+                            }
+                        }
+                    }
+                    
                     return row
                 } else {
                     row += 1
@@ -64,11 +87,14 @@ class PGNGame {
             }
         }
         
-        func addVariation(node startNode: PGNGameNode, startingAtRowIndex startRow: Int) {
+        func addVariation(node startNode: PGNGameNode, startingAtRowIndex startRow: Int) -> Int {
             
             // Keep track of nodes, so we can add variations later
             var nodes: [PGNGameNode] = []
             var currentRowIndex = startRow
+            
+            // What's the highest row index that was used
+            var maxRowIndex = startRow
             
             // Loop through all of the moves, adding each where it fits
             var node: PGNGameNode? = startNode
@@ -87,14 +113,19 @@ class PGNGame {
             
             // Go through and add variations
             for node in nodes.reversed() {
+                var rowIndex: Int = locations[node.id] ?? 0
                 for variation in node.variations.dropFirst() {
-                    addVariation(node: variation, startingAtRowIndex: (locations[node.id] ?? 0) + 1)
+                    rowIndex = addVariation(node: variation, startingAtRowIndex: rowIndex + 1)
+                    if rowIndex > maxRowIndex {
+                        maxRowIndex = rowIndex
+                    }
                 }
             }
             
+            return maxRowIndex
         }
         
-        addVariation(node: self.root, startingAtRowIndex: 0)
+        let _ = addVariation(node: self.root, startingAtRowIndex: 0)
         
         return (layout: layout, locations: locations)
     }
