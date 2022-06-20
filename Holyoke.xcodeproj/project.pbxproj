@@ -25,6 +25,10 @@
 		D35711E2285A0B49002C0CC1 /* Antlr4 in Embed Frameworks */ = {isa = PBXBuildFile; productRef = D35711E0285A0B49002C0CC1 /* Antlr4 */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		D35711E5285A0B4F002C0CC1 /* Antlr4 in Frameworks */ = {isa = PBXBuildFile; productRef = D35711E4285A0B4F002C0CC1 /* Antlr4 */; };
 		D35711E6285A0B4F002C0CC1 /* Antlr4 in Embed Frameworks */ = {isa = PBXBuildFile; productRef = D35711E4285A0B4F002C0CC1 /* Antlr4 */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		D379ED4328600A840078B22C /* GameMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379ED4228600A840078B22C /* GameMetadataView.swift */; };
+		D379ED4428600A840078B22C /* GameMetadataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379ED4228600A840078B22C /* GameMetadataView.swift */; };
+		D379ED46286024D80078B22C /* PlayerNamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379ED45286024D80078B22C /* PlayerNamesView.swift */; };
+		D379ED47286024D80078B22C /* PlayerNamesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379ED45286024D80078B22C /* PlayerNamesView.swift */; };
 		D384C790285588AE00E9357F /* Chessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C78F285588AE00E9357F /* Chessboard.swift */; };
 		D384C79128558B5200E9357F /* Chessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C78F285588AE00E9357F /* Chessboard.swift */; };
 		D384C79428558E1700E9357F /* Move.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384C79328558E1700E9357F /* Move.swift */; };
@@ -79,6 +83,8 @@
 		D357114B285A024C002C0CC1 /* PGNBaseListener.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PGNBaseListener.swift; sourceTree = "<group>"; };
 		D357114C285A024C002C0CC1 /* PGNParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PGNParser.swift; sourceTree = "<group>"; };
 		D35711DF285A0A55002C0CC1 /* antlr4 */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = antlr4; path = Packages/antlr4; sourceTree = "<group>"; };
+		D379ED4228600A840078B22C /* GameMetadataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameMetadataView.swift; sourceTree = "<group>"; };
+		D379ED45286024D80078B22C /* PlayerNamesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerNamesView.swift; sourceTree = "<group>"; };
 		D384C78F285588AE00E9357F /* Chessboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chessboard.swift; sourceTree = "<group>"; };
 		D384C79328558E1700E9357F /* Move.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Move.swift; sourceTree = "<group>"; };
 		D3AC3CAA285A5FF5000BC33B /* PGN.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGN.swift; sourceTree = "<group>"; };
@@ -210,6 +216,8 @@
 				D3350F75285CD3A60025EE11 /* GameControlsView.swift */,
 				D3350F78285D47D50025EE11 /* GameTreeView.swift */,
 				D3350F7B285D63D60025EE11 /* MoveDetailView.swift */,
+				D379ED4228600A840078B22C /* GameMetadataView.swift */,
+				D379ED45286024D80078B22C /* PlayerNamesView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -330,6 +338,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D379ED46286024D80078B22C /* PlayerNamesView.swift in Sources */,
 				D384C790285588AE00E9357F /* Chessboard.swift in Sources */,
 				D3AC3CAB285A5FF5000BC33B /* PGN.swift in Sources */,
 				D3350F79285D47D50025EE11 /* GameTreeView.swift in Sources */,
@@ -337,6 +346,7 @@
 				D357114D285A024C002C0CC1 /* PGNListener.swift in Sources */,
 				D357114F285A024C002C0CC1 /* PGNLexer.swift in Sources */,
 				D3CFE31D28596C6C00E25606 /* ChessboardView.swift in Sources */,
+				D379ED4328600A840078B22C /* GameMetadataView.swift in Sources */,
 				D3B468D2285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
 				D3350F76285CD3A60025EE11 /* GameControlsView.swift in Sources */,
 				D3B468D0285174A600A97CC1 /* HolyokeApp.swift in Sources */,
@@ -352,6 +362,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D379ED47286024D80078B22C /* PlayerNamesView.swift in Sources */,
 				D3B468D3285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
 				D3AC3CAC285A5FF5000BC33B /* PGN.swift in Sources */,
 				D3350F7A285D47D50025EE11 /* GameTreeView.swift in Sources */,
@@ -359,6 +370,7 @@
 				D357114E285A024C002C0CC1 /* PGNListener.swift in Sources */,
 				D3571150285A024C002C0CC1 /* PGNLexer.swift in Sources */,
 				D3CFE31E28596C6C00E25606 /* ChessboardView.swift in Sources */,
+				D379ED4428600A840078B22C /* GameMetadataView.swift in Sources */,
 				D384C79128558B5200E9357F /* Chessboard.swift in Sources */,
 				D3350F77285CD3A60025EE11 /* GameControlsView.swift in Sources */,
 				D3B468D1285174A600A97CC1 /* HolyokeApp.swift in Sources */,

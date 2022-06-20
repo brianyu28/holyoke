@@ -17,8 +17,24 @@ extension UTType {
 final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     
     @Published var games: [PGNGame]
-    @Published var currentGameIndex: Int
+    @Published var currentGameIndex: Int {
+        willSet(newGameIndex) {
+            self.gameCurrentNodes[self.games[currentGameIndex].id] = self.currentNode
+        }
+        didSet {
+            if !self.games.indices.contains(currentGameIndex) {
+                return
+            }
+            
+            let currentGame = self.games[currentGameIndex]
+            let newCurrentNode = self.gameCurrentNodes[currentGame.id] ?? currentGame.root
+            self.resetChessboardToNode(node: newCurrentNode)
+        }
+    }
     @Published var currentNode: PGNGameNode
+    
+    // Mapping from game IDs to the current node in each game
+    var gameCurrentNodes: [Int: PGNGameNode]
 
     init() {
         let games = PGNGameListener.parseGamesFromPGNString(pgn: "")
@@ -28,6 +44,7 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         self.games = games
         self.currentGameIndex = currentGameIndex
         self.currentNode = games[currentGameIndex].root
+        self.gameCurrentNodes = [:]
         self.currentNode.chessboard = chessboard
     }
 
@@ -49,6 +66,7 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         self.games = games
         self.currentGameIndex = currentGameIndex
         self.currentNode = games[currentGameIndex].root
+        self.gameCurrentNodes = [:]
         self.currentNode.chessboard = chessboard
     }
     
@@ -65,7 +83,7 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         let data = text.data(using: .utf8)!
         return .init(regularFileWithContents: data)
     }
-    
+
     // Gameplay
     
     func makeMoveOnBoard(move: Move) {
@@ -112,6 +130,10 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
                 currentNode.chessboard = chessboard.getChessboardAfterMove(move: move)
             }
         }
+    }
+    
+    func forceManualRefresh() {
+        objectWillChange.send()
     }
     
     // Controls

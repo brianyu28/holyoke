@@ -19,7 +19,11 @@ struct GameLayoutPoint: Hashable, Equatable {
     }
 }
 
-class PGNGame {
+class PGNGame: Identifiable {
+    // Incremenets to keep track of unique game IDs
+    static private var inc: Int = 0
+    let id: Int
+    
     /**
      Game metadata. Standard game metadata includes "Event", "Site", "Date", "Round", "White", "Black", "Result"
      */
@@ -36,9 +40,66 @@ class PGNGame {
     var gameTermination: PGNGameTermination
     
     init() {
+        Self.inc += 1
+        self.id = Self.inc
+        
         metadata = []
         root = PGNGameNode(parent: nil)
         gameTermination = .asterisk
+    }
+    
+    var whitePlayerName: String {
+        return self.getMetadata(query: "White") ?? "White"
+    }
+    
+    var blackPlayerName: String {
+        return self.getMetadata(query: "Black") ?? "Black"
+    }
+    
+    var gameTitleDescription: String {
+        let date = self.getMetadata(query: "Date")
+        
+        return "\(whitePlayerName) – \(blackPlayerName)\(date != nil ? " (\(date!))" : "")"
+    }
+    
+    func getMetadata(query: String) -> String? {
+        for (field: field, value: value) in metadata {
+            if field == query {
+                return value
+            }
+        }
+        return nil
+    }
+    
+    func setMetadata(field: String, value: String) {
+        for i in metadata.indices {
+            if metadata[i].field == field {
+                metadata[i] = (field: field, value: value)
+                return
+            }
+        }
+        
+        // Field not found, add it
+        metadata.append((field: field, value: value))
+    }
+    
+    // Ensure that the required STR (Steven Tag Roster) tags are present
+    func completeSTRMetadata() {
+        let requiredTags = [
+            (field: "Event", value: "???"),
+            (field: "Site", value: "???"),
+            (field: "Date", value: "????.??.??"),
+            (field: "Round", value: "?"),
+            (field: "White", value: "White"),
+            (field: "Black", value: "Black"),
+            (field: "Result", value: "*")
+        ]
+        for (field: field, value: value) in requiredTags {
+            if self.getMetadata(query: field) == nil {
+                self.metadata.append((field: field, value: value))
+            }
+        }
+        
     }
     
     func generateNodeLayout() -> (layout: [[PGNGameNode?]], locations: [Int: Int]) {
@@ -131,6 +192,9 @@ class PGNGame {
     }
     
     func generatePGNText() -> String {
+        
+        self.setMetadata(field: "Result", value: self.gameTermination.rawValue)
+
         var pgnString = ""
         for tag in metadata {
             pgnString += "[\(tag.field) \"\(tag.value.replacingOccurrences(of: "\"", with: "\\\""))\"]\n"
@@ -191,8 +255,8 @@ class PGNGame {
 class PGNGameNode: Identifiable, Equatable {
     // Incremenets to keep track of unique game node IDs
     static private var inc: Int = 0
-
     let id: Int
+    
     let moveNumber: Int
     let playerColor: PlayerColor
     
@@ -335,7 +399,7 @@ class PGNGameNode: Identifiable, Equatable {
     }
 }
 
-enum PGNGameTermination: String {
+enum PGNGameTermination: String, CaseIterable {
     case whiteWin = "1-0"
     case blackWin = "0-1"
     case draw = "1/2-1/2"
@@ -458,7 +522,10 @@ class PGNGameListener : PGNBaseListener {
     }
     
     override func exitPgn_game(_ ctx: PGNParser.Pgn_gameContext) {
+        currentGame.completeSTRMetadata()
         games.append(currentGame)
         currentGame = PGNGame()
+        let firstMoveNode = currentGame.root.addNewVariation()
+        variationStack = [firstMoveNode]
     }
 }

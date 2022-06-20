@@ -11,9 +11,18 @@ struct GameControlsView: View {
     @ObservedObject var document: HolyokeDocument
     
     @State private var isPresentingDeleteConfirmation = false
+    @State private var isShowingGameMetadataView = false
     
     var body: some View {
         HStack {
+            Button {
+                isShowingGameMetadataView = true
+            } label: {
+                Image(systemName: "info.circle")
+            }
+            .keyboardShortcut("I", modifiers: .command)
+            .help("Get info")
+            
             Button {
                 document.updateCurrentNodeToPreviousVariation()
             } label: {
@@ -60,6 +69,9 @@ struct GameControlsView: View {
             }
             .keyboardShortcut(.rightArrow, modifiers: [])
             .help("Next move")
+        }
+        .sheet(isPresented: $isShowingGameMetadataView) {
+            GameMetadataView(document: document)
         }
     }
 }
