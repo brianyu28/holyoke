@@ -20,8 +20,8 @@ struct GameTreeView: View {
     var body: some View {
         ZStack {
             
-            ForEach(0...(tree.layout.count - 1), id:\.self) { (rowIndex: Int) in
-                ForEach(0...(tree.layout[rowIndex].count - 1), id: \.self) { (colIndex: Int) in
+            ForEach(tree.layout.indices, id:\.self) { (rowIndex: Int) in
+                ForEach(tree.layout[rowIndex].indices, id: \.self) { (colIndex: Int) in
                     if let node: PGNGameNode = tree.layout[rowIndex][colIndex] {
                         ForEach(node.variations) { (variation: PGNGameNode) in
                             if let variationRow = tree.locations[variation.id] {

@@ -20,7 +20,13 @@ struct TestingView: View {
                 PlayerNamesView(whitePlayer: document.currentGame.whitePlayerName, blackPlayer: document.currentGame.blackPlayerName, turn: document.currentNode.playerColor.nextColor)
                 ChessboardView(chessboard: document.currentNode.chessboard, makeMove: document.makeMoveOnBoard)
                 GameControlsView(document: document)
-                Text(document.currentNode.moveSequenceUntilCurrentNode())
+                GeometryReader { geometry in
+                    Text(document.currentNode.moveSequenceUntilCurrentNode())
+                        .frame(width: geometry.size.width)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
+                }
             }
             .fixedSize(horizontal: true, vertical: false)
             .padding()
