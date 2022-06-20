@@ -20,7 +20,7 @@ struct ChessboardSquareStyle {
 }
 
 struct ChessboardView: View {
-    var chessboard: Chessboard
+    var chessboard: Chessboard?
     
     let makeMove: (Move) -> ()
     
@@ -42,7 +42,7 @@ struct ChessboardView: View {
                                 .frame(width: squareSize, height: squareSize)
                             
                             if let _ = legalMovesForSelectedPiece[BoardSquare(rank: rank, file: file)] {
-                                if let _ = chessboard.pieceAt(rank: rank, file: file) {
+                                if let _ = chessboard?.pieceAt(rank: rank, file: file) {
                                     Circle()
                                         .fill(Color(red: 0, green: 0, blue: 0, opacity: 0.5))
                                         .frame(width: squareSize * 1.0, height: squareSize * 1.0)
@@ -59,7 +59,7 @@ struct ChessboardView: View {
                                     .frame(width: squareSize, height: squareSize)
                             }
                             
-                            if let piece = chessboard.pieceAt(rank: rank, file: file) {
+                            if let piece = chessboard?.pieceAt(rank: rank, file: file) {
                                 Image(piece.assetName)
                                     .resizable()
                                     .frame(width: squareSize, height: squareSize)
@@ -67,6 +67,10 @@ struct ChessboardView: View {
                             
                         }
                         .onTapGesture {
+                            guard let chessboard = chessboard else {
+                                return
+                            }
+
                             
                             if let legalMove = legalMovesForSelectedPiece[BoardSquare(rank: rank, file: file)] {
                                 selectedSquare = nil

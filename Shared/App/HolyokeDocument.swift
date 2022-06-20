@@ -17,18 +17,18 @@ extension UTType {
 final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     
     @Published var games: [PGNGame]
-    @Published var chessboard: Chessboard
     @Published var currentGameIndex: Int
     @Published var currentNode: PGNGameNode
 
     init() {
         let games = PGNGameListener.parseGamesFromPGNString(pgn: "")
         let currentGameIndex = 0
+        let chessboard = Chessboard.initInStartingPosition()
         
         self.games = games
-        self.chessboard = Chessboard.initInStartingPosition()
         self.currentGameIndex = currentGameIndex
         self.currentNode = games[currentGameIndex].root
+        self.currentNode.chessboard = chessboard
     }
 
     static var readableContentTypes: [UTType] { [.pgnType] }
@@ -44,11 +44,12 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         
         let games = PGNGameListener.parseGamesFromPGNString(pgn: string)
         let currentGameIndex = 0
+        let chessboard = Chessboard.initInStartingPosition()
         
         self.games = games
-        self.chessboard = Chessboard.initInStartingPosition()
         self.currentGameIndex = currentGameIndex
         self.currentNode = games[currentGameIndex].root
+        self.currentNode.chessboard = chessboard
     }
     
     func snapshot(contentType: UTType) throws -> [PGNGame] {
@@ -68,6 +69,9 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     // Gameplay
     
     func makeMoveOnBoard(move: Move) {
+        guard let chessboard = currentNode.chessboard else {
+            return
+        }
         
         // Find move notation for the move
         var moveNotation: String? = nil
@@ -94,20 +98,33 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
             // Found next move node, make it the current node
             currentNode.setSelectedVariation(variation: nextNode)
             currentNode = nextNode
-            chessboard = chessboard.getChessboardAfterMove(move: move)
+            if currentNode.chessboard == nil {
+                currentNode.chessboard = chessboard.getChessboardAfterMove(move: move)
+            }
         } else {
             // Add the move as a new variation to the current node, make it the new current node
             let newNode = currentNode.addNewVariation()
             newNode.move = moveNotation
             currentNode.setSelectedVariation(variation: newNode)
+            
             currentNode = newNode
-            chessboard = chessboard.getChessboardAfterMove(move: move)
+            if currentNode.chessboard == nil {
+                currentNode.chessboard = chessboard.getChessboardAfterMove(move: move)
+            }
         }
     }
     
     // Controls
     
     func resetChessboardToNode(node: PGNGameNode) {
+        
+        // If we already have the board saved, no need for any more computation
+        if node.chessboard != nil {
+            currentNode = node
+            return
+        }
+        
+        // Otherwise, we need to compute the position
         var nodes: [PGNGameNode] = []
         
         // Loop through nodes to get to parent
@@ -130,12 +147,15 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
             }
             board = board.getChessboardAfterMove(move: move)
         }
-        chessboard = board
+        node.chessboard = board
         currentNode = node
         
     }
     
     func updateCurrentNodeToNextMove() {
+        guard let chessboard = currentNode.chessboard else {
+            return
+        }
         
         // If there are no more moves to make, return
         if currentNode.variations.count == 0 {
@@ -152,7 +172,7 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
             return
         }
         currentNode = variation
-        chessboard = chessboard.getChessboardAfterMove(move: move)
+        currentNode.chessboard = chessboard.getChessboardAfterMove(move: move)
     }
     
     func updateCurrentNodeToPreviousMove() {

@@ -211,6 +211,9 @@ class PGNGameNode: Identifiable, Equatable {
     // Which of the variations is "selected"; that is, should be chosen when we go to the next move
     var selectedVariationIndex: Int?
     
+    // Chessboard for current node, so that we can return to nodes more easily
+    var chessboard: Chessboard?
+    
     init(parent: PGNGameNode?) {
         Self.inc += 1
         self.id = Self.inc
@@ -230,6 +233,8 @@ class PGNGameNode: Identifiable, Equatable {
         self.isCheckmate = false
         
         self.selectedVariationIndex = nil
+        
+        self.chessboard = nil
     }
     
     public static func == (lhs: PGNGameNode, rhs: PGNGameNode) -> Bool {

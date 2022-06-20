@@ -18,7 +18,7 @@ struct TestingView: View {
             
             // Chessboard and Controls
             VStack {
-                ChessboardView(chessboard: document.chessboard, makeMove: document.makeMoveOnBoard)
+                ChessboardView(chessboard: document.currentNode.chessboard, makeMove: document.makeMoveOnBoard)
                 GameControlsView(document: document)
                 Text(document.currentNode.moveSequenceUntilCurrentNode())
             }

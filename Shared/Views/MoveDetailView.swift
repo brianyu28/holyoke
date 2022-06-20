@@ -22,7 +22,7 @@ struct MoveDetailView: View {
                     ForEach(document.currentNode.variations) { variation in
                         Text(variation.pgnNotation(withMoveNumber: true, withComments: false))
                             .onTapGesture {
-                                guard let move = document.chessboard.legalMoves[variation.move ?? ""] else {
+                                guard let move = document.currentNode.chessboard?.legalMoves[variation.move ?? ""] else {
                                     return
                                 }
                                 document.makeMoveOnBoard(move: move)
