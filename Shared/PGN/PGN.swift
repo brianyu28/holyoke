@@ -58,8 +58,9 @@ class PGNGame: Identifiable {
     
     var gameTitleDescription: String {
         let date = self.getMetadata(query: "Date")
+        let dateString: String = (date == nil || date == "????.??.??") ? "" : " (\(date!))"
         
-        return "\(whitePlayerName) – \(blackPlayerName)\(date != nil ? " (\(date!))" : "")"
+        return "\(whitePlayerName) – \(blackPlayerName)\(dateString)"
     }
     
     func getMetadata(query: String) -> String? {

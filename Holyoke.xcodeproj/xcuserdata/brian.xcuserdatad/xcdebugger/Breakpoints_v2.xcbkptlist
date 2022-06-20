@@ -14,8 +14,8 @@
             filePath = "Shared/PGN/PGN.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "526"
-            endingLineNumber = "526"
+            startingLineNumber = "527"
+            endingLineNumber = "527"
             landmarkName = "exitPgn_game(_:)"
             landmarkType = "7">
          </BreakpointContent>

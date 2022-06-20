@@ -11,6 +11,8 @@ struct GameMetadataView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var document: HolyokeDocument
     
+    @State private var isPresentingDeleteConfirmation = false
+    
     @State private var metaEvent = ""
     @State private var metaSite = ""
     @State private var metaDate = ""
@@ -100,6 +102,21 @@ struct GameMetadataView: View {
                     dismiss()
                 }
                 .keyboardShortcut(.escape, modifiers: [])
+                
+                Button("Delete") {
+                    isPresentingDeleteConfirmation = true
+                }
+                .keyboardShortcut(.delete, modifiers: .command)
+                .help("Delete game")
+                .confirmationDialog("Delete game?", isPresented: $isPresentingDeleteConfirmation) {
+                    Button("Confirm Delete", role: .destructive) {
+                        document.deleteCurrentGame()
+                    }
+                }
+                
+                Button("New Game") {
+                    
+                }
                 
                 Button("Save") {
                     saveMetadataToGameData()

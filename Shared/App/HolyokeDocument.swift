@@ -19,6 +19,9 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     @Published var games: [PGNGame]
     @Published var currentGameIndex: Int {
         willSet(newGameIndex) {
+            if !self.games.indices.contains(currentGameIndex) {
+                return
+            }
             self.gameCurrentNodes[self.games[currentGameIndex].id] = self.currentNode
         }
         didSet {
@@ -256,5 +259,17 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
             parent.variations.remove(at: index)
             parent.selectedVariationIndex = parent.variations.isEmpty ? nil : max(index - 1, 0)
         }
+    }
+    
+    func deleteCurrentGame() {
+        // There must always be at least one game
+        if self.games.count <= 1 {
+            return
+        }
+        
+        let newGameIndex = max(self.currentGameIndex - 1, 0)
+        let _ = self.gameCurrentNodes.removeValue(forKey: self.currentGame.id)
+        self.games.remove(at: self.currentGameIndex)
+        self.currentGameIndex = newGameIndex
     }
 }
