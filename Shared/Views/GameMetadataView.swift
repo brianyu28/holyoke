@@ -115,7 +115,7 @@ struct GameMetadataView: View {
                 }
                 
                 Button("New Game") {
-                    
+                    document.createNewGame()
                 }
                 
                 Button("Save") {

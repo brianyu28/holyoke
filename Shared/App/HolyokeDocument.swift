@@ -272,4 +272,13 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         self.games.remove(at: self.currentGameIndex)
         self.currentGameIndex = newGameIndex
     }
+    
+    func createNewGame() {
+        let game = PGNGame()
+        let chessboard = Chessboard.initInStartingPosition()
+        game.root.chessboard = chessboard
+        self.games.append(game)
+        self.currentGameIndex = self.games.count - 1
+        self.currentNode = game.root
+    }
 }
