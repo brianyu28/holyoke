@@ -135,7 +135,7 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         
     }
     
-    func nextMove() {
+    func updateCurrentNodeToNextMove() {
         
         // If there are no more moves to make, return
         if currentNode.variations.count == 0 {
@@ -155,12 +155,64 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         chessboard = chessboard.getChessboardAfterMove(move: move)
     }
     
-    func previousMove() {
+    func updateCurrentNodeToPreviousMove() {
         // If there's no previous move, stop
         guard let node = currentNode.parent else {
             return
         }
         
         self.resetChessboardToNode(node: node)
+    }
+    
+    func updateCurrentNodeToNextVariation() {
+        // Move needs a parent
+        guard let parent = currentNode.parent else {
+            return
+        }
+        
+        // Needs multiple variations to work
+        if parent.variations.count == 1 {
+            return
+        }
+        
+        let nextVariationIndex = (parent.selectedVariationIndex ?? 0) + 1
+        
+        if nextVariationIndex < parent.variations.count {
+            self.resetChessboardToNode(node: parent.variations[nextVariationIndex])
+        }
+    }
+    
+    func updateCurrentNodeToPreviousVariation() {
+        // Move needs a parent
+        guard let parent = currentNode.parent else {
+            return
+        }
+        
+        // Needs multiple variations to work
+        if parent.variations.count == 1 {
+            return
+        }
+        
+        let previousVariationIndex = (parent.selectedVariationIndex ?? 0) - 1
+        
+        if previousVariationIndex >= 0 {
+            self.resetChessboardToNode(node: parent.variations[previousVariationIndex])
+        }
+    }
+    
+    func deleteCurrentNode() {
+        // Move needs a parent
+        guard let parent = currentNode.parent else {
+            return
+        }
+        
+        let nodeToDelete = self.currentNode
+        
+        self.currentNode = parent
+        parent.setSelectedVariation(variation: nodeToDelete)
+        if let index = parent.selectedVariationIndex {
+            parent.variations.remove(at: index)
+            parent.selectedVariationIndex = parent.variations.isEmpty ? nil : max(index - 1, 0)
+        }
     }
 }
