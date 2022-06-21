@@ -16,13 +16,7 @@ struct EngineView: View {
         VStack {
             if engine.isRunningEngine {
                 Button("Stop Engine") {
-                    engine.stop()
-                }
-                
-                List {
-                    ForEach(engine.lines.indices, id: \.self) { i in
-                        Text(engine.lines[i])
-                    }
+                    engine.stop(clearLines: false)
                 }
             } else {
                 Button("Start Engine") {
@@ -32,14 +26,29 @@ struct EngineView: View {
                     engine.run(board: board)
                 }
             }
+            
+            List {
+                ForEach(engine.lines.indices, id: \.self) { i in
+                    if let line = engine.lines[i] {
+                        Text("\(line.cp, specifier: "%.2f") (d = \(line.depth)) \(line.variation)")
+                        .onTapGesture {
+                            document.makeMoveOnBoard(move: line.move)
+                            
+                        }
+                    }
+                }
+            }
         }
         .onReceive(document.$currentNode) { node in
-            if engine.isRunningEngine && node.chessboard?.fen != engine.currentBoard?.fen {
-                engine.stop()
+            let isRunning = engine.isRunningEngine
+            if node.chessboard?.fen != engine.currentBoard?.fen {
+                engine.stop(clearLines: true)
                 guard let board = node.chessboard else {
                     return
                 }
-                engine.run(board: board)
+                if isRunning {
+                    engine.run(board: board)
+                }
             }
         }
     }

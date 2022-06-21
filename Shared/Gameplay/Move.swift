@@ -51,6 +51,24 @@ enum PieceType {
             return "P"
         }
     }
+    
+    static func fromDescription(description: String) -> PieceType? {
+        if description == "K" {
+            return .king
+        } else if description == "Q" {
+            return .queen
+        } else if description == "R" {
+            return .rook
+        } else if description == "B" {
+            return .bishop
+        } else if description == "K" {
+            return .knight
+        } else if description == "P" {
+            return .pawn
+        } else {
+            return nil
+        }
+    }
 }
 
 struct Piece : CustomStringConvertible, Equatable {
@@ -126,6 +144,8 @@ struct BoardSquare: CustomStringConvertible, Equatable, Hashable {
         self.rank = rank
         self.file = file
     }
+    
+    
     
     public static func == (lhs: BoardSquare, rhs: BoardSquare) -> Bool {
         return lhs.rank == rhs.rank && lhs.file == rhs.file

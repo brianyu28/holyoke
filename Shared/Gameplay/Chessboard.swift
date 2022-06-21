@@ -668,4 +668,48 @@ class Chessboard : CustomStringConvertible {
             move.currentSquare == square
         })
     }
+    
+    // Interpreting UCI move sequence
+    func movesFromUCIVariation(sequence: [String]) -> (Move?, String) {
+        var firstMove: Move? = nil
+        var line: String = ""
+        
+        var currentBoard: Chessboard = self
+        
+        for moveText in sequence {
+            if moveText.count != 4 && moveText.count != 5 {
+                continue
+            }
+            
+            let startFile = BoardSquare.fileReverseMapping[String(moveText[moveText.index(moveText.startIndex, offsetBy: 0)])] ?? 0
+            let startRank = Int(String(moveText[moveText.index(moveText.startIndex, offsetBy: 1)])) ?? 0
+            let startSquare = BoardSquare(rank: 8 - startRank, file: startFile)
+            let endFile = BoardSquare.fileReverseMapping[String(moveText[moveText.index(moveText.startIndex, offsetBy: 2)])] ?? 0
+            let endRank = Int(String(moveText[moveText.index(moveText.startIndex, offsetBy: 3)])) ?? 0
+            let endSquare = BoardSquare(rank: 8 - endRank, file: endFile)
+            let promotion: PieceType? = moveText.count == 5 ? PieceType.fromDescription(description: String(moveText[moveText.index(moveText.startIndex, offsetBy: 4)])) : nil
+            
+            for (notation, move) in currentBoard.legalMoves {
+                if move.currentSquare == startSquare && move.newSquare == endSquare && move.promotion == promotion {
+                    
+                    if move.piece.color == .white {
+                        line += String(currentBoard.fullmoveNumber) + ". " + notation + " "
+                    } else if firstMove == nil {
+                        line += String(currentBoard.fullmoveNumber) + "... " + notation + " "
+                    } else {
+                        line += notation + " "
+                    }
+                    
+                    if firstMove == nil {
+                        firstMove = move
+                    }
+                    
+                    currentBoard = currentBoard.getChessboardAfterMove(move: move)
+                    break
+                }
+            }
+        }
+        
+        return (firstMove, line)
+    }
 }
