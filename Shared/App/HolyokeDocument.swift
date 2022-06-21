@@ -261,24 +261,56 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         }
     }
     
-    func deleteCurrentGame() {
+    func deleteGameById(gameId: Int) {
         // There must always be at least one game
         if self.games.count <= 1 {
             return
         }
         
-        let newGameIndex = max(self.currentGameIndex - 1, 0)
-        let _ = self.gameCurrentNodes.removeValue(forKey: self.currentGame.id)
-        self.games.remove(at: self.currentGameIndex)
-        self.currentGameIndex = newGameIndex
+        // Find the game to delete
+        var gameIndex: Int? = nil
+        for (i, game) in self.games.enumerated() {
+            if game.id == gameId {
+                gameIndex = i
+                break
+            }
+        }
+        guard let gameIndex = gameIndex else {
+            return
+        }
+        
+        let newCurrentGameIndex = self.currentGameIndex >= gameIndex ? max(self.currentGameIndex - 1, 0) : self.currentGameIndex
+        let _ = self.gameCurrentNodes.removeValue(forKey: gameId)
+        self.games.remove(at: gameIndex)
+        self.currentGameIndex = newCurrentGameIndex
+
     }
     
-    func createNewGame() {
+    func deleteCurrentGame() {
+        self.deleteGameById(gameId: self.currentGame.id)
+    }
+    
+    func createNewGame(undoManager: UndoManager?) {
         let game = PGNGame()
         let chessboard = Chessboard.initInStartingPosition()
         game.root.chessboard = chessboard
         self.games.append(game)
         self.currentGameIndex = self.games.count - 1
         self.currentNode = game.root
+        
+        guard let undoManager = undoManager else {
+            return
+        }
+        
+        print("Undo manager is here!")
+        
+        undoManager.registerUndo(withTarget: self, handler: { document in
+            print("Deleting the newly created game...")
+            // Don't delete the game if it has moves
+            if game.root.variations.count > 0 {
+                return
+            }
+            document.deleteGameById(gameId: game.id)
+        })
     }
 }

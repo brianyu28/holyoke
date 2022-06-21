@@ -10,7 +10,11 @@
 import SwiftUI
 
 struct TestingView: View {
+    @Environment(\.undoManager) var undoManager
+    
     @ObservedObject var document: HolyokeDocument
+    
+    @State private var selectedTabIndex = 1
     
     var body: some View {
         HStack {
@@ -31,10 +35,24 @@ struct TestingView: View {
             .fixedSize(horizontal: true, vertical: false)
             .padding()
             
-            // PGN View, move details, variations
-            VStack {
-                GameTreeView(document: document, tree: document.currentGame.generateNodeLayout())
-                MoveDetailView(document: document)
+            TabView(selection: $selectedTabIndex) {
+                
+                GameMetadataView(document: document)
+                .tabItem {
+                    Label("Game", systemImage: "info.circle")
+                }
+                .tag(0)
+                
+                // PGN View, move details, variations
+                VStack {
+                    GameTreeView(document: document, tree: document.currentGame.generateNodeLayout())
+                    MoveDetailView(document: document)
+                }
+                .tabItem {
+                    Label("Moves", systemImage: "square.filled.on.square")
+                }
+                .tag(1)
+                
             }
             .padding()
         }
