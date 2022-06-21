@@ -24,6 +24,7 @@ struct TestingView: View {
                 PlayerNamesView(whitePlayer: document.currentGame.whitePlayerName, blackPlayer: document.currentGame.blackPlayerName, turn: document.currentNode.playerColor.nextColor)
                 ChessboardView(chessboard: document.currentNode.chessboard, makeMove: document.makeMoveOnBoard)
                 GameControlsView(document: document)
+                Text(document.currentNode.chessboard!.fen)
                 GeometryReader { geometry in
                     Text(document.currentNode.moveSequenceUntilCurrentNode())
                         .frame(width: geometry.size.width)
@@ -52,6 +53,11 @@ struct TestingView: View {
                     Label("Moves", systemImage: "square.filled.on.square")
                 }
                 .tag(1)
+                
+                EngineView(document: document)
+                .tabItem {
+                    Label("Engine", systemImage: "server.rack")
+                }
                 
             }
             .padding()

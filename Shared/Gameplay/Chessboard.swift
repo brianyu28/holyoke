@@ -35,6 +35,60 @@ class Chessboard : CustomStringConvertible {
     static private let diagionalDirections = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
     static private let horizontalDirections = [(1, 0), (-1, 0), (0, 1), (0, -1)]
     
+    var fen: String {
+        var boardState = ""
+        for (i, row) in self.position.enumerated() {
+            var spaces = 0
+            for piece in row {
+                guard let piece = piece else {
+                    spaces += 1
+                    continue
+                }
+                if spaces > 0 {
+                    boardState += String(spaces)
+                    spaces = 0
+                }
+                boardState += piece.description
+            }
+            if spaces > 0 {
+                boardState += String(spaces)
+            }
+            if i < 7 {
+                boardState += "/"
+            }
+        }
+        
+        let activeColor = self.playerToMove == .white ? "w" : "b"
+        
+        var castling = ""
+        if self.whiteRightToCastleKingside {
+            castling += "K"
+        }
+        if self.whiteRightToCastleQueenside {
+            castling += "Q"
+        }
+        if self.blackRightToCastleKingside {
+            castling += "k"
+        }
+        if self.blackRightToCastleQueenside {
+            castling += "q"
+        }
+        if castling.count == 0 {
+            castling = "-"
+        }
+        
+        var enPassant = "-"
+        if let move = self.mostRecentMove {
+            if move.piece.type == .pawn && move.piece.color == .white && move.currentSquare.rank == 6 && move.newSquare.rank == 4 {
+                enPassant = "\(move.currentSquare.fileNotation)3"
+            } else if move.piece.type == .pawn && move.piece.color == .black && move.currentSquare.rank == 1 && move.newSquare.rank == 3 {
+                enPassant = "\(move.currentSquare.fileNotation)6"
+            }
+        }
+        
+        return "\(boardState) \(activeColor) \(castling) \(enPassant) \(halfmoveClock) \(fullmoveNumber)"
+    }
+    
     var playerToMove: PlayerColor {
         return mostRecentMove?.piece.color.nextColor ?? .white
     }
