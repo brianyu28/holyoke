@@ -89,13 +89,15 @@ class ChessEngine: ObservableObject {
             guard let move = move else {
                 return
             }
-
-            self.lines[lineIndex] = Line(
-                depth: depth,
-                cp: cpDouble,
-                move: move,
-                variation: line
-            )
+            
+            DispatchQueue.main.async {
+                self.lines[lineIndex] = Line(
+                    depth: depth,
+                    cp: cpDouble,
+                    move: move,
+                    variation: line
+                )
+            }
         }
     }
     
@@ -126,44 +128,46 @@ class ChessEngine: ObservableObject {
         let outHandle = pipe.fileHandleForReading
         outHandle.waitForDataInBackgroundAndNotify()
         
-        var progressObserver : NSObjectProtocol!
-        progressObserver = NotificationCenter.default.addObserver(
-            forName: NSNotification.Name.NSFileHandleDataAvailable,
-            object: outHandle, queue: nil)
-        {
-            notification -> Void in
-            let data = outHandle.availableData
+        DispatchQueue.global(qos: .userInteractive).async {
+            var progressObserver : NSObjectProtocol!
+            progressObserver = NotificationCenter.default.addObserver(
+                forName: NSNotification.Name.NSFileHandleDataAvailable,
+                object: outHandle, queue: nil)
+            {
+                notification -> Void in
+                let data = outHandle.availableData
 
-            if data.count > 0 {
-                if let str = String(data: data, encoding: String.Encoding.utf8) {
-                    self.handlePossibleLine(line: str)
+                if data.count > 0 {
+                    if let str = String(data: data, encoding: String.Encoding.utf8) {
+                        self.handlePossibleLine(line: str)
+                    }
+                    outHandle.waitForDataInBackgroundAndNotify()
+                } else {
+                    // That means we've reached the end of the input.
+                    NotificationCenter.default.removeObserver(progressObserver!)
                 }
-                outHandle.waitForDataInBackgroundAndNotify()
-            } else {
-                // That means we've reached the end of the input.
-                NotificationCenter.default.removeObserver(progressObserver!)
             }
-        }
 
-        var terminationObserver : NSObjectProtocol!
-        terminationObserver = NotificationCenter.default.addObserver(
-            forName: Process.didTerminateNotification,
-            object: task, queue: nil)
-        {
-            notification -> Void in
-            // Done running process
-            NotificationCenter.default.removeObserver(terminationObserver!)
-        }
-
-        task.launch()
-        
-        do {
-            try writeHandle.write(contentsOf: Data("position fen \(board.fen)\n".data(using: .utf8)!))
-            try writeHandle.write(contentsOf: Data("setoption name MultiPV value \(Self.numVariations)\n".data(using: .utf8)!))
-            try writeHandle.write(contentsOf: Data("go infinite\n".data(using: .utf8)!))
-            // try writeHandle.close()
-        } catch {
+            var terminationObserver : NSObjectProtocol!
+            terminationObserver = NotificationCenter.default.addObserver(
+                forName: Process.didTerminateNotification,
+                object: task, queue: nil)
+            {
+                notification -> Void in
+                // Done running process
+                NotificationCenter.default.removeObserver(terminationObserver!)
+            }
             
+            task.launch()
+            
+            do {
+                try writeHandle.write(contentsOf: Data("position fen \(board.fen)\n".data(using: .utf8)!))
+                try writeHandle.write(contentsOf: Data("setoption name MultiPV value \(Self.numVariations)\n".data(using: .utf8)!))
+                try writeHandle.write(contentsOf: Data("go infinite\n".data(using: .utf8)!))
+                // try writeHandle.close()
+            } catch {
+                
+            }
         }
     }
     
