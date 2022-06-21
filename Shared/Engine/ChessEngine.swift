@@ -28,6 +28,7 @@ class ChessEngine: ObservableObject {
     // TODO: Allow configuration of these parameters
     static private let enginePath = "/opt/homebrew/bin/stockfish"
     static private let numVariations = 5
+    static private let variationLength = 8
     
     init() {
         task = nil
@@ -85,7 +86,7 @@ class ChessEngine: ObservableObject {
             }
             let variation = Array(subcomponents[(pvLabelIndex + 1)...])
 
-            let (move, line): (Move?, String) = currentBoard.movesFromUCIVariation(sequence: variation)
+            let (move, line): (Move?, String) = currentBoard.movesFromUCIVariation(sequence: Array(variation.prefix(Self.variationLength)))
             guard let move = move else {
                 return
             }

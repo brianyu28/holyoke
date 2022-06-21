@@ -58,6 +58,7 @@ struct TestingView: View {
                 .tabItem {
                     Label("Engine", systemImage: "server.rack")
                 }
+                .tag(2)
                 
             }
             .padding()
