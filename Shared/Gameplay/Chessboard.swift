@@ -14,7 +14,8 @@ typealias ChessPosition = [[Piece?]]
 
 class Chessboard : CustomStringConvertible {
     var position: ChessPosition
-    var mostRecentMove: Move?
+    var playerToMove: PlayerColor
+    var enPassantTarget: BoardSquare?
     
     // Properties computed on each move
     var whiteRightToCastleKingside: Bool
@@ -35,99 +36,10 @@ class Chessboard : CustomStringConvertible {
     static private let diagionalDirections = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
     static private let horizontalDirections = [(1, 0), (-1, 0), (0, 1), (0, -1)]
     
-    var fen: String {
-        var boardState = ""
-        for (i, row) in self.position.enumerated() {
-            var spaces = 0
-            for piece in row {
-                guard let piece = piece else {
-                    spaces += 1
-                    continue
-                }
-                if spaces > 0 {
-                    boardState += String(spaces)
-                    spaces = 0
-                }
-                boardState += piece.description
-            }
-            if spaces > 0 {
-                boardState += String(spaces)
-            }
-            if i < 7 {
-                boardState += "/"
-            }
-        }
-        
-        let activeColor = self.playerToMove == .white ? "w" : "b"
-        
-        var castling = ""
-        if self.whiteRightToCastleKingside {
-            castling += "K"
-        }
-        if self.whiteRightToCastleQueenside {
-            castling += "Q"
-        }
-        if self.blackRightToCastleKingside {
-            castling += "k"
-        }
-        if self.blackRightToCastleQueenside {
-            castling += "q"
-        }
-        if castling.count == 0 {
-            castling = "-"
-        }
-        
-        var enPassant = "-"
-        if let move = self.mostRecentMove {
-            if move.piece.type == .pawn && move.piece.color == .white && move.currentSquare.rank == 6 && move.newSquare.rank == 4 {
-                enPassant = "\(move.currentSquare.fileNotation)3"
-            } else if move.piece.type == .pawn && move.piece.color == .black && move.currentSquare.rank == 1 && move.newSquare.rank == 3 {
-                enPassant = "\(move.currentSquare.fileNotation)6"
-            }
-        }
-        
-        return "\(boardState) \(activeColor) \(castling) \(enPassant) \(halfmoveClock) \(fullmoveNumber)"
-    }
-    
-    var playerToMove: PlayerColor {
-        return mostRecentMove?.piece.color.nextColor ?? .white
-    }
-    
-    /**
-     * Returns the piece at given coordinates.
-     */
-    func pieceAt(rank: Int, file: Int) -> Piece? {
-        if ((0...7).contains(rank) && (0...7).contains(file)) {
-            return position[rank][file]
-        }
-        return nil
-    }
-    
-    /**
-     Returns all of the pieces.
-     */
-    func piecesForPlayer(player: PlayerColor) -> [(Piece, BoardSquare)] {
-        var pieces: [(Piece, BoardSquare)] = []
-        for rankIndex in 0...7 {
-            for fileIndex in 0...7 {
-                if let piece = position[rankIndex][fileIndex] {
-                    if piece.color == player {
-                        pieces.append((piece, BoardSquare(rank: rankIndex, file: fileIndex)))
-                    }
-                }
-            }
-        }
-        return pieces
-    }
-
-    // Returns an empty chess position
-    static func emptyPosition() -> ChessPosition {
-        return [[Piece?]](repeating: [Piece?](repeating: nil, count: 8), count: 8)
-    }
-    
-    init(position: ChessPosition, mostRecentMove: Move?, fullmoveNumber: Int, halfmoveClock: Int, computeLegalMoves: Bool = true) {
+    init(position: ChessPosition, playerToMove: PlayerColor, enPassantTarget: BoardSquare?, fullmoveNumber: Int, halfmoveClock: Int, computeLegalMoves: Bool = true) {
         self.position = position
-        self.mostRecentMove = mostRecentMove
+        self.playerToMove = playerToMove
+        self.enPassantTarget = enPassantTarget
         self.fullmoveNumber = fullmoveNumber
         self.halfmoveClock = halfmoveClock
         self.legalMoves = [:]
@@ -137,7 +49,7 @@ class Chessboard : CustomStringConvertible {
         self.blackRightToCastleKingside = true
         self.blackRightToCastleQueenside = true
         
-        if (computeLegalMoves) {
+        if computeLegalMoves {
             self.computeAndSaveLegalMoves()
         }
     }
@@ -190,7 +102,86 @@ class Chessboard : CustomStringConvertible {
                 Piece(color: .white, type: .rook),
             ]
         ]
-        return Chessboard(position: startingPosition, mostRecentMove: nil, fullmoveNumber: 1, halfmoveClock: 0)
+        return Chessboard(position: startingPosition, playerToMove: .white, enPassantTarget: nil, fullmoveNumber: 1, halfmoveClock: 0)
+    }
+    
+    var fen: String {
+        var boardState = ""
+        for (i, row) in self.position.enumerated() {
+            var spaces = 0
+            for piece in row {
+                guard let piece = piece else {
+                    spaces += 1
+                    continue
+                }
+                if spaces > 0 {
+                    boardState += String(spaces)
+                    spaces = 0
+                }
+                boardState += piece.description
+            }
+            if spaces > 0 {
+                boardState += String(spaces)
+            }
+            if i < 7 {
+                boardState += "/"
+            }
+        }
+        
+        let activeColor = self.playerToMove == .white ? "w" : "b"
+        
+        var castling = ""
+        if self.whiteRightToCastleKingside {
+            castling += "K"
+        }
+        if self.whiteRightToCastleQueenside {
+            castling += "Q"
+        }
+        if self.blackRightToCastleKingside {
+            castling += "k"
+        }
+        if self.blackRightToCastleQueenside {
+            castling += "q"
+        }
+        if castling.count == 0 {
+            castling = "-"
+        }
+        
+        let enPassant = self.enPassantTarget?.notation ?? "-"
+        
+        return "\(boardState) \(activeColor) \(castling) \(enPassant) \(halfmoveClock) \(fullmoveNumber)"
+    }
+    
+    /**
+     * Returns the piece at given coordinates.
+     */
+    func pieceAt(rank: Int, file: Int) -> Piece? {
+        if ((0...7).contains(rank) && (0...7).contains(file)) {
+            return position[rank][file]
+        }
+        return nil
+    }
+    
+    /**
+     Returns all of the pieces.
+     */
+    func piecesForPlayer(player: PlayerColor) -> [(Piece, BoardSquare)] {
+        var pieces: [(Piece, BoardSquare)] = []
+        for rankIndex in 0...7 {
+            for fileIndex in 0...7 {
+                if let piece = position[rankIndex][fileIndex] {
+                    if piece.color == player {
+                        pieces.append((piece, BoardSquare(rank: rankIndex, file: fileIndex)))
+                    }
+                }
+            }
+        }
+        return pieces
+    }
+
+    // Returns an empty chess position
+    static func emptyPosition() -> ChessPosition {
+        return [[Piece?]](repeating: [Piece?](repeating: nil, count: 8), count: 8)
     }
     
     func getChessboardAfterMove(move: Move, computeNextLegalMoves: Bool = true) -> Chessboard {
@@ -234,9 +225,20 @@ class Chessboard : CustomStringConvertible {
             newPosition[rookRank][rookStartFile] = nil
         }
         
+        let enPassantTarget: BoardSquare? = {
+            if move.piece.type == .pawn && move.piece.color == .white && move.currentSquare.rank == 6 && move.newSquare.rank == 4 {
+                return BoardSquare(rank: 5, file: move.currentSquare.file)
+            } else if move.piece.type == .pawn && move.piece.color == .black && move.currentSquare.rank == 1 && move.newSquare.rank == 3 {
+                return BoardSquare(rank: 2, file: move.currentSquare.file)
+            } else {
+                return nil
+            }
+        }()
+        
         let board = Chessboard(
             position: newPosition,
-            mostRecentMove: move,
+            playerToMove: self.playerToMove.nextColor,
+            enPassantTarget: enPassantTarget,
             fullmoveNumber: piece.color == .white ? self.fullmoveNumber : self.fullmoveNumber + 1,
             halfmoveClock: piece.type != .pawn && !move.isCapture ? self.halfmoveClock + 1 : 0,
             computeLegalMoves: false
@@ -271,21 +273,21 @@ class Chessboard : CustomStringConvertible {
     
     // Checks if it is valid for a player to move a piece to a particular square
     // True if the square valid and either is empty or is occupied by the opposite player
-    func isValidMovementSquare(square: BoardSquare, player: PlayerColor) -> (isValid: Bool, isCapture: Bool, wouldBeKingCapture: Bool) {
+    func isValidMovementSquare(square: BoardSquare, player: PlayerColor) -> (isValid: Bool, isCapture: Bool) {
         if !square.isValidSquare {
-            return (isValid: false, isCapture: false, wouldBeKingCapture: false)
+            return (isValid: false, isCapture: false)
         }
         let piece = self.pieceAt(rank: square.rank, file: square.file)
         if piece == nil {
-            return (isValid: true, isCapture: false, wouldBeKingCapture: false)
+            return (isValid: true, isCapture: false)
         } else if piece!.color == player.nextColor {
             if piece!.type == .king {
-                return (isValid: false, isCapture: false, wouldBeKingCapture: true)
+                return (isValid: false, isCapture: false)
             } else {
-                return (isValid: true, isCapture: true, wouldBeKingCapture: false)
+                return (isValid: true, isCapture: true)
             }
         } else {
-            return (isValid: false, isCapture: false, wouldBeKingCapture: false)
+            return (isValid: false, isCapture: false)
         }
     }
     
@@ -427,6 +429,7 @@ class Chessboard : CustomStringConvertible {
             }
         }
         
+        // Check for pawn checks
         let candidateSquares = [
             BoardSquare(rank: player == .white ? kingRank - 1 : kingRank + 1, file: kingFile - 1),
             BoardSquare(rank: player == .white ? kingRank - 1 : kingRank + 1, file: kingFile + 1),
@@ -524,11 +527,12 @@ class Chessboard : CustomStringConvertible {
                 }
                 
                 // Check if En Passant is allowed
-                if (currentSquare.rank == (playerToMove == .white ? 3 : 4) && self.mostRecentMove != nil && self.mostRecentMove!.piece.type == .pawn
-                    && self.mostRecentMove!.newSquare.rank == (playerToMove == .white ? 3 : 4) && abs(self.mostRecentMove!.newSquare.file - currentSquare.file) == 1) {
-                    moves.append(Move(withEnPassantByPawn: piece, currentSquare: currentSquare, newSquare: BoardSquare(rank: playerToMove == .white ? 2 : 5, file: self.mostRecentMove!.newSquare.file)))
+                if let enPassantTarget = enPassantTarget {
+                    if currentSquare.rank == (playerToMove == .white ? 3 : 4) && enPassantTarget.rank == (playerToMove == .white ? 2 : 5) && abs(enPassantTarget.file - currentSquare.file) == 1 {
+                        moves.append(Move(withEnPassantByPawn: piece, currentSquare: currentSquare, newSquare: BoardSquare(rank: playerToMove == .white ? 2 : 5, file: enPassantTarget.file)))
+                    }
                 }
-                
+
             case .knight:
                 
                 for (rankDirection, fileDirection) in Self.diagionalDirections {

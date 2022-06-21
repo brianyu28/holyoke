@@ -30,9 +30,9 @@
             filePath = "Shared/Gameplay/Chessboard.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "674"
-            endingLineNumber = "674"
-            landmarkName = "movesFromUCIVariation(sequence:)"
+            startingLineNumber = "678"
+            endingLineNumber = "678"
+            landmarkName = "legalMovesForPieceAtSquare(square:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
