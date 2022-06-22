@@ -716,10 +716,10 @@ class Chessboard : CustomStringConvertible {
                 continue
             }
             
-            let startFile = BoardSquare.fileReverseMapping[String(moveText[moveText.index(moveText.startIndex, offsetBy: 0)])] ?? 0
+            let startFile = Chessboard.fileFromSan(string: String(moveText[moveText.index(moveText.startIndex, offsetBy: 0)])) ?? 0
             let startRank = Int(String(moveText[moveText.index(moveText.startIndex, offsetBy: 1)])) ?? 0
             let startSquare = BoardSquare(rank: 8 - startRank, file: startFile)
-            let endFile = BoardSquare.fileReverseMapping[String(moveText[moveText.index(moveText.startIndex, offsetBy: 2)])] ?? 0
+            let endFile = Chessboard.fileFromSan(string: String(moveText[moveText.index(moveText.startIndex, offsetBy: 2)])) ?? 0
             let endRank = Int(String(moveText[moveText.index(moveText.startIndex, offsetBy: 3)])) ?? 0
             let endSquare = BoardSquare(rank: 8 - endRank, file: endFile)
             let promotion: PieceType? = moveText.count == 5 ? PieceType.fromDescription(description: String(moveText[moveText.index(moveText.startIndex, offsetBy: 4)])) : nil

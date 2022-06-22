@@ -8,69 +8,93 @@
 import Foundation
 
 /**
- Represents a chess move as (rank, file), each in [0, 7].
+ Represents a square on the chessboard, with a rank and file.
  */
 struct BoardSquare: CustomStringConvertible, Equatable, Hashable {
+    
+    /**
+     The rank (row) of the square on the chessboard.
+     */
     let rank: BoardRank
-    let file: Int
     
-    static let fileMapping = [0: "a", 1: "b", 2: "c", 3: "d", 4: "e", 5: "f", 6: "g", 7: "h"]
-    static let fileReverseMapping = ["a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7]
+    /**
+     The file (column) of the square on the chessboard.
+     */
+    let file: BoardFile
     
-    init(rank: Int, file: Int) {
+    /**
+     Initializes a new board square based on a rank and file.
+     
+     - Parameters:
+        - rank: The square's rank.
+        - file: The square's file.
+     */
+    init(rank: BoardRank, file: BoardFile) {
         self.rank = rank
         self.file = file
     }
     
-    // Init from algebraic notation
+    /**
+     Initializes a new board square based on SAN notation for the square.
+     
+     - Parameters:
+        - san: SAN representation of board square (e.g. "e4")
+     
+     - Returns: A board square matching the SAN notation, or `nil` of SAN is invalid.
+     */
     static func initFromSan(san: String) -> BoardSquare? {
         if san.count != 2 {
             return nil
         }
-        let fileString: String = String(san[san.index(san.startIndex, offsetBy: 0)])
-        let rank: Int? = Int(String(san[san.index(san.startIndex, offsetBy: 1)]))
-        guard let rank = rank else {
+        guard let file: BoardFile = Chessboard.fileFromSan(string: String(Array(san)[0])) else {
             return nil
         }
-        if rank < 0 || rank > 7 {
-            return nil
-        }
-        let file: Int? = Self.fileReverseMapping[fileString] ?? nil
-        guard let file = file else {
-            return nil
-        }
-        if file < 0 || file > 7 {
+        guard let rank: BoardRank = Chessboard.rankFromSan(string: String(Array(san)[1])) else {
             return nil
         }
         return BoardSquare(rank: rank, file: file)
     }
     
+    /**
+     Checks if two board squares are equal.
+     Board squares are considered equal if they have the same rank and file.
+     */
     public static func == (lhs: BoardSquare, rhs: BoardSquare) -> Bool {
         return lhs.rank == rhs.rank && lhs.file == rhs.file
     }
     
+    /**
+     Hashes a board square.
+     Board squares are hashed based on their rank and file.
+     */
     func hash(into hasher: inout Hasher) {
             hasher.combine(rank)
             hasher.combine(file)
     }
     
-    var fileNotation: String {
-        return Self.fileMapping[self.file] ?? "?"
-    }
+    /**
+     SAN notation representation of the square's file, or `"?"` if the file is invalid.
+     */
+    var fileNotation: String { Chessboard.sanFromFile(file: self.file) ?? "?" }
+
+    /**
+     SAN notation representation of the square's rank, assumed to be valid.
+     */
+    var rankNotation: String { Chessboard.sanFromRank(rank: self.rank) }
     
-    var rankNotation: String {
-        return "\(8 - self.rank)"
-    }
+    /**
+     SAN notation representation of the square.
+     */
+    var notation: String { "\(fileNotation)\(rankNotation)" }
     
-    var notation: String {
-        return "\(fileNotation)\(rankNotation)"
-    }
+    /**
+     Description of the string using SAN notation.
+     Used to conform to `CustomStringConvertible` so that `BoardSquare`s can be printed.
+     */
+    var description: String { notation }
     
-    var description: String {
-        return self.notation
-    }
-    
-    var isValidSquare: Bool {
-        return self.rank >= 0 && self.rank <= 7 && self.file >= 0 && self.file <= 7
-    }
+    /**
+     Whether the square is a valid square on the board.
+     */
+    var isValidSquare: Bool { Chessboard.isValidRank(rank: self.rank) && Chessboard.isValidFile(file: self.file) }
 }

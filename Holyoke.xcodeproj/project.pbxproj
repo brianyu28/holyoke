@@ -21,6 +21,8 @@
 		D332C17628632F96009DB79F /* BoardSquare.swift in Sources */ = {isa = PBXBuildFile; fileRef = D332C17428632F96009DB79F /* BoardSquare.swift */; };
 		D332C17828633123009DB79F /* BoardRank.swift in Sources */ = {isa = PBXBuildFile; fileRef = D332C17728633123009DB79F /* BoardRank.swift */; };
 		D332C17928633123009DB79F /* BoardRank.swift in Sources */ = {isa = PBXBuildFile; fileRef = D332C17728633123009DB79F /* BoardRank.swift */; };
+		D332C17B28633522009DB79F /* BoardFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D332C17A28633522009DB79F /* BoardFile.swift */; };
+		D332C17C28633522009DB79F /* BoardFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D332C17A28633522009DB79F /* BoardFile.swift */; };
 		D3350F76285CD3A60025EE11 /* GameControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3350F75285CD3A60025EE11 /* GameControlsView.swift */; };
 		D3350F77285CD3A60025EE11 /* GameControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3350F75285CD3A60025EE11 /* GameControlsView.swift */; };
 		D3350F79285D47D50025EE11 /* GameTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3350F78285D47D50025EE11 /* GameTreeView.swift */; };
@@ -109,6 +111,7 @@
 		D332C17128632DF2009DB79F /* PieceAsset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceAsset.swift; sourceTree = "<group>"; };
 		D332C17428632F96009DB79F /* BoardSquare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardSquare.swift; sourceTree = "<group>"; };
 		D332C17728633123009DB79F /* BoardRank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardRank.swift; sourceTree = "<group>"; };
+		D332C17A28633522009DB79F /* BoardFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardFile.swift; sourceTree = "<group>"; };
 		D3350F75285CD3A60025EE11 /* GameControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameControlsView.swift; sourceTree = "<group>"; };
 		D3350F78285D47D50025EE11 /* GameTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTreeView.swift; sourceTree = "<group>"; };
 		D3350F7B285D63D60025EE11 /* MoveDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveDetailView.swift; sourceTree = "<group>"; };
@@ -295,6 +298,7 @@
 				D332C1692863249E009DB79F /* PieceType.swift */,
 				D332C16C28632B74009DB79F /* Piece.swift */,
 				D332C17728633123009DB79F /* BoardRank.swift */,
+				D332C17A28633522009DB79F /* BoardFile.swift */,
 				D332C17428632F96009DB79F /* BoardSquare.swift */,
 				D384C79328558E1700E9357F /* Move.swift */,
 				D384C78F285588AE00E9357F /* Chessboard.swift */,
@@ -449,6 +453,7 @@
 				D379ED4328600A840078B22C /* GameMetadataView.swift in Sources */,
 				D3579AC32862AA7F000A6A9F /* GameStartPositionEditor.swift in Sources */,
 				D3B468D2285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
+				D332C17B28633522009DB79F /* BoardFile.swift in Sources */,
 				D336AD8A28615A2D00DA0D56 /* Collection.swift in Sources */,
 				D3350F76285CD3A60025EE11 /* GameControlsView.swift in Sources */,
 				D332C17828633123009DB79F /* BoardRank.swift in Sources */,
@@ -488,6 +493,7 @@
 				D379ED4428600A840078B22C /* GameMetadataView.swift in Sources */,
 				D3579AC42862AA7F000A6A9F /* GameStartPositionEditor.swift in Sources */,
 				D384C79128558B5200E9357F /* Chessboard.swift in Sources */,
+				D332C17C28633522009DB79F /* BoardFile.swift in Sources */,
 				D336AD8B28615A2D00DA0D56 /* Collection.swift in Sources */,
 				D3350F77285CD3A60025EE11 /* GameControlsView.swift in Sources */,
 				D332C17928633123009DB79F /* BoardRank.swift in Sources */,
