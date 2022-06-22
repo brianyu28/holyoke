@@ -7,39 +7,101 @@
 
 import Foundation
 
-// Board position
-// Chessboard is represented by an 8x8 2D array
-// Each row represents a rank, starting with the 8th rank
+/**
+ A chess position is represented as a 8x8 2D array of pieces.
+ Each row represents a rank, starting with the 8th rank.
+ Values of `nil` represent empty squares.
+ */
 typealias ChessPosition = [[Piece?]]
 
+/**
+ Represents a chessboard.
+ */
 class Chessboard : CustomStringConvertible {
+    
+    /**
+     The current position of pieces on the chessboard.
+     */
     var position: ChessPosition
+    
+    /**
+     The player whose turn it is to move on the current board.
+     */
     var playerToMove: PlayerColor
+    
+    /**
+     If a pawn has just moved two spaces, the square over which it passed.
+     This is used to determine en passant rights for the next player.
+     */
     var enPassantTarget: BoardSquare?
     
-    // Properties computed on each move
+    /**
+     Whether White has the right to castle kingside.
+     */
     var whiteRightToCastleKingside: Bool
+    
+    /**
+     Whether White has the right to castle queenside.
+     */
     var whiteRightToCastleQueenside: Bool
+    
+    /**
+     Whether Black has the right to castle kingside.
+     */
     var blackRightToCastleKingside: Bool
+    
+    /**
+     Whether Black has the right to castle queenside.
+     */
     var blackRightToCastleQueenside: Bool
     
-    // Starts at 1 on the first turn, increments after each Black turn
-    private var fullmoveNumber: Int
+    /**
+     Move number of the current board.
+     Begins at 1 on the first turn, increments by 1 after each turn by Black.
+     */
+    var fullmoveNumber: Int
     
-    // Starts at 0, increases by 1 for every non-capture, non-pawn move
-    private var halfmoveClock: Int
+    /**
+     The number of half-moves that have passed since the last non-capture, non-pawn move.
+     This value starts at 0 and increases by 1 for every non-capture, non-pawn move.
+     */
+    var halfmoveClock: Int
     
-    // Dictionary mapping move name in Algebraic Notation to move
+    /**
+     The legal moves on the current chessboard.
+     This is represented as a dictionary mapping SAN notation for moves to a `Move`.
+     For efficiency, this is not computed for every chessboard, needs to be computed before use.
+     */
     var legalMoves: [String: Move]
     
-    // Starting position
-    static let startingPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    /**
+     The four possible diagional directions, for use in movement by knights, bishops, queens, and kings.
+     */
+    static let diagionalDirections = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
     
-    // Rank and file directions
-    static private let diagionalDirections = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
-    static private let horizontalDirections = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+    /**
+     The four possible horizontal directions, for use in movement by rooks, queens, and kings.
+     */
+    static let horizontalDirections = [(1, 0), (-1, 0), (0, 1), (0, -1)]
     
-    init(position: ChessPosition, playerToMove: PlayerColor, enPassantTarget: BoardSquare?, fullmoveNumber: Int, halfmoveClock: Int, computeLegalMoves: Bool = true) {
+    /**
+     Initializes a new chessboard.
+     
+     - Parameters:
+        - position: The position of the board.
+        - playerToMove: Whose players turn it is on the current board.
+        - enPassantTarget: The square over which a pawn has just passed if it moved two spaces, `nil` if inapplicable.
+        - fullmoveNumber: The number of the current move, incremented after each Black turn.
+        - halfmoveClock: The number of half-moves that have passed since the last pawn move or capture.
+        - whiteRightToCastleKingside: Whether White has the right to castle kingside, `true` by default.
+        - whiteRightToCastleQueenside: Whether White has the right to castle queenside, `true` by default.
+        - blackRightToCastleKingside: Whether Black has the right to castle kingside, `true` by default.
+        - blackRightToCastleQueenside: Whether Black has the right to castle queenside, `true` by default.
+        - computeLegalMoves: Whether the legal moves should be computed and saved for the current position, `true` by default.
+     */
+    init(position: ChessPosition, playerToMove: PlayerColor, enPassantTarget: BoardSquare?, fullmoveNumber: Int, halfmoveClock: Int,
+         whiteRightToCastleKingside: Bool = true, whiteRightToCastleQueenside: Bool = true,
+         blackRightToCastleKingside : Bool = true, blackRightToCastleQueenside: Bool = true) {
         self.position = position
         self.playerToMove = playerToMove
         self.enPassantTarget = enPassantTarget
@@ -47,281 +109,16 @@ class Chessboard : CustomStringConvertible {
         self.halfmoveClock = halfmoveClock
         self.legalMoves = [:]
         
-        self.whiteRightToCastleKingside = true
-        self.whiteRightToCastleQueenside = true
-        self.blackRightToCastleKingside = true
-        self.blackRightToCastleQueenside = true
-        
-        if computeLegalMoves {
-            self.computeAndSaveLegalMoves()
-        }
-    }
-    
-    // Initialize in starting position from FEN, returns nil if invalid FEN
-    static func initFromFen(fen: String) -> Chessboard? {
-        let components = fen.components(separatedBy: " ")
-        if components.count != 6 {
-            return nil
-        }
-        
-        var position: ChessPosition = [
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-        ]
-        
-        let ranks = components[0].components(separatedBy: "/")
-        if ranks.count != 8 {
-            return nil
-        }
-        for (i, rank) in ranks.enumerated() {
-            var file = 0
-            for char in rank {
-                if file > 7 {
-                    return nil
-                }
-                if let piece = Piece.fromDescription(description: String(char)) {
-                    position[i][file] = piece
-                    file += 1
-                } else if let spaces = Int(String(char)) {
-                    file += spaces
-                } else {
-                    return nil
-                }
-            }
-            if file != 8 {
-                return nil
-            }
-        }
-        
-        let activeColor: PlayerColor? = components[1] == "w" ? .white : components[1] == "b" ? .black : nil
-        guard let activeColor = activeColor else {
-            return nil
-        }
-        
-        let castling = components[2]
-        let whiteRightToCastleKingside = castling.contains("K")
-        let whiteRightToCastleQueenside = castling.contains("Q")
-        let blackRightToCastleKingside = castling.contains("k")
-        let blackRightToCastleQueenside = castling.contains("q")
-        
-        let enPassantTarget: BoardSquare? = BoardSquare.initFromSan(san: components[3])
-        
-        let halfmoveClock: Int? = Int(components[4])
-        guard let halfmoveClock = halfmoveClock else {
-            return nil
-        }
-        
-        let fullmoveNumber: Int? = Int(components[5])
-        guard let fullmoveNumber = fullmoveNumber else {
-            return nil
-        }
-        
-        let board = Chessboard(position: position, playerToMove: activeColor, enPassantTarget: enPassantTarget, fullmoveNumber: fullmoveNumber, halfmoveClock: halfmoveClock)
-        board.whiteRightToCastleKingside = whiteRightToCastleKingside
-        board.whiteRightToCastleQueenside = whiteRightToCastleQueenside
-        board.blackRightToCastleKingside = blackRightToCastleKingside
-        board.blackRightToCastleQueenside = blackRightToCastleQueenside
-        board.computeAndSaveLegalMoves()
-        return board
-    }
-    
-    // Initialize in starting position
-    static func initInStartingPosition() -> Chessboard {
-        return self.initFromFen(fen: Self.startingPositionFEN)!
-    }
-    
-    var fen: String {
-        var boardState = ""
-        for (i, row) in self.position.enumerated() {
-            var spaces = 0
-            for piece in row {
-                guard let piece = piece else {
-                    spaces += 1
-                    continue
-                }
-                if spaces > 0 {
-                    boardState += String(spaces)
-                    spaces = 0
-                }
-                boardState += piece.description
-            }
-            if spaces > 0 {
-                boardState += String(spaces)
-            }
-            if i < 7 {
-                boardState += "/"
-            }
-        }
-        
-        let activeColor = self.playerToMove == .white ? "w" : "b"
-        
-        var castling = ""
-        if self.whiteRightToCastleKingside {
-            castling += "K"
-        }
-        if self.whiteRightToCastleQueenside {
-            castling += "Q"
-        }
-        if self.blackRightToCastleKingside {
-            castling += "k"
-        }
-        if self.blackRightToCastleQueenside {
-            castling += "q"
-        }
-        if castling.count == 0 {
-            castling = "-"
-        }
-        
-        let enPassant = self.enPassantTarget?.notation ?? "-"
-        
-        return "\(boardState) \(activeColor) \(castling) \(enPassant) \(halfmoveClock) \(fullmoveNumber)"
+        self.whiteRightToCastleKingside = whiteRightToCastleKingside
+        self.whiteRightToCastleQueenside = whiteRightToCastleQueenside
+        self.blackRightToCastleKingside = blackRightToCastleKingside
+        self.blackRightToCastleQueenside = blackRightToCastleQueenside
     }
     
     /**
-     * Returns the piece at given coordinates.
+     String representation of a board to satisfy `CustomStringConvertible`.
+     Used for debugging when printing a chessboard.
      */
-    func pieceAt(rank: Int, file: Int) -> Piece? {
-        if ((0...7).contains(rank) && (0...7).contains(file)) {
-            return position[rank][file]
-        }
-        return nil
-    }
-    
-    /**
-     Returns all of the pieces.
-     */
-    func piecesForPlayer(player: PlayerColor) -> [(Piece, BoardSquare)] {
-        var pieces: [(Piece, BoardSquare)] = []
-        for rankIndex in 0...7 {
-            for fileIndex in 0...7 {
-                if let piece = position[rankIndex][fileIndex] {
-                    if piece.color == player {
-                        pieces.append((piece, BoardSquare(rank: rankIndex, file: fileIndex)))
-                    }
-                }
-            }
-        }
-        return pieces
-    }
-
-    // Returns an empty chess position
-    static func emptyPosition() -> ChessPosition {
-        return [[Piece?]](repeating: [Piece?](repeating: nil, count: 8), count: 8)
-    }
-    
-    func getChessboardAfterMove(move: Move, computeNextLegalMoves: Bool = true) -> Chessboard {
-        
-        guard let piece = self.pieceAt(rank: move.startSquare.rank, file: move.startSquare.file) else {
-            return self
-        }
-        
-        var newPosition = Self.emptyPosition()
-        for rank in 0...7 {
-            for file in 0...7 {
-                newPosition[rank][file] = self.position[rank][file]
-            }
-        }
-        
-        // Make move
-        newPosition[move.startSquare.rank][move.startSquare.file] = nil
-        newPosition[move.endSquare.rank][move.endSquare.file] = piece
-        
-        // Check for en passant
-        if move.isEnPassant {
-            newPosition[piece.color == .white ? move.endSquare.rank + 1 : move.endSquare.rank - 1][move.endSquare.file] = nil
-        }
-        
-        if let promotionPieceType = move.promotion {
-            newPosition[move.endSquare.rank][move.endSquare.file] = Piece(color: piece.color, type: promotionPieceType)
-        }
-        
-        // Check for castling
-        if move.isCastleShort {
-            let rookRank = piece.color == .white ? 7 : 0
-            let rookStartFile = 7
-            let rookEndFile = 5
-            newPosition[rookRank][rookEndFile] = newPosition[rookRank][rookStartFile]
-            newPosition[rookRank][rookStartFile] = nil
-        } else if move.isCastleLong {
-            let rookRank = piece.color == .white ? 7 : 0
-            let rookStartFile = 0
-            let rookEndFile = 3
-            newPosition[rookRank][rookEndFile] = newPosition[rookRank][rookStartFile]
-            newPosition[rookRank][rookStartFile] = nil
-        }
-        
-        let enPassantTarget: BoardSquare? = {
-            if move.piece.type == .pawn && move.piece.color == .white && move.startSquare.rank == 6 && move.endSquare.rank == 4 {
-                return BoardSquare(rank: 5, file: move.startSquare.file)
-            } else if move.piece.type == .pawn && move.piece.color == .black && move.startSquare.rank == 1 && move.endSquare.rank == 3 {
-                return BoardSquare(rank: 2, file: move.startSquare.file)
-            } else {
-                return nil
-            }
-        }()
-        
-        let board = Chessboard(
-            position: newPosition,
-            playerToMove: self.playerToMove.nextColor,
-            enPassantTarget: enPassantTarget,
-            fullmoveNumber: piece.color == .white ? self.fullmoveNumber : self.fullmoveNumber + 1,
-            halfmoveClock: piece.type != .pawn && !move.isCapture ? self.halfmoveClock + 1 : 0,
-            computeLegalMoves: false
-        )
-        board.whiteRightToCastleKingside = (
-            self.whiteRightToCastleKingside &&
-            !(move.piece.color == .white && move.piece.type == .king) &&
-            !(move.piece.color == .white && move.piece.type == .rook && move.startSquare.rank == 7 && move.startSquare.file == 7)
-        )
-        board.whiteRightToCastleQueenside = (
-            self.whiteRightToCastleQueenside &&
-            !(move.piece.color == .white && move.piece.type == .king) &&
-            !(move.piece.color == .white && move.piece.type == .rook && move.startSquare.rank == 7 && move.startSquare.file == 0)
-        )
-        board.blackRightToCastleKingside = (
-            self.blackRightToCastleKingside &&
-            !(move.piece.color == .black && move.piece.type == .king) &&
-            !(move.piece.color == .black && move.piece.type == .rook && move.startSquare.rank == 0 && move.startSquare.file == 7)
-        )
-        board.blackRightToCastleQueenside = (
-            self.blackRightToCastleQueenside &&
-            !(move.piece.color == .black && move.piece.type == .king) &&
-            !(move.piece.color == .black && move.piece.type == .rook && move.startSquare.rank == 0 && move.startSquare.file == 0)
-        )
-        
-        if (computeNextLegalMoves) {
-            board.computeAndSaveLegalMoves()
-        }
-        
-        return board
-    }
-    
-    // Checks if it is valid for a player to move a piece to a particular square
-    // True if the square valid and either is empty or is occupied by the opposite player
-    func isValidMovementSquare(square: BoardSquare, player: PlayerColor) -> (isValid: Bool, isCapture: Bool) {
-        if !square.isValidSquare {
-            return (isValid: false, isCapture: false)
-        }
-        let piece = self.pieceAt(rank: square.rank, file: square.file)
-        if piece == nil {
-            return (isValid: true, isCapture: false)
-        } else if piece!.color == player.nextColor {
-            if piece!.type == .king {
-                return (isValid: false, isCapture: false)
-            } else {
-                return (isValid: true, isCapture: true)
-            }
-        } else {
-            return (isValid: false, isCapture: false)
-        }
-    }
-    
     var description : String {
         var representation = ""
         for rank in position {
@@ -337,414 +134,50 @@ class Chessboard : CustomStringConvertible {
         return representation
     }
     
-    func computeAndSaveLegalMoves() {
-        self.legalMoves = [:]
-        
-        let moveList = self.computeLegalMoves()
-        for move in moveList {
-            
-            var suffix = ""
-            let board = self.getChessboardAfterMove(move: move, computeNextLegalMoves: false)
-            if board.isPlayerInCheck(player: board.playerToMove) {
-                if board.isPlayerInCheckmate(player: board.playerToMove) {
-                    suffix = "#"
-                } else {
-                    suffix = "+"
-                }
-            }
-            if move.piece.type == .pawn {
-                var moveName = ""
-                if move.isCapture {
-                    moveName += "\(move.startSquare.fileNotation)x"
-                }
-                moveName += move.endSquare.notation
-                if let promotionType = move.promotion {
-                    moveName += "=\(promotionType.description)"
-                }
-                self.legalMoves[moveName + suffix] = move
-            } else if move.isCastleShort {
-                self.legalMoves["0-0" + suffix] = move
-            } else if move.isCastleLong {
-                self.legalMoves["0-0-0" + suffix] = move
-            } else {
-                let ambiguousMoves = moveList.filter { otherMove in
-                    move.piece.type == otherMove.piece.type &&
-                    move.endSquare.rank == otherMove.endSquare.rank &&
-                    move.endSquare.file == otherMove.endSquare.file
-                }
-                
-                var moveName = ""
-                if ambiguousMoves.count == 1 {
-                    moveName += move.piece.type.description
-                } else if (ambiguousMoves.filter { otherMove in move.startSquare.file == otherMove.startSquare.file }).count == 1 {
-                    moveName += move.piece.type.description + move.startSquare.fileNotation
-                } else if (ambiguousMoves.filter { otherMove in move.startSquare.rank == otherMove.startSquare.rank }).count == 1 {
-                    moveName += move.piece.type.description + move.startSquare.rankNotation
-                } else {
-                    moveName += move.piece.type.description + move.startSquare.notation
-                }
-                if move.isCapture {
-                    moveName += "x"
-                }
-                moveName += move.endSquare.notation
-                self.legalMoves[moveName + suffix] = move
-            }
+    /**
+     Returns whatever is located at given rank and file on the chessboard.
+     
+     - Parameters:
+        - rank: The square's rank.
+        - file: The square's file.
+     
+     - Returns: The piece located at the square, or `nil` if there is no piece at the square.
+     */
+    func pieceAt(rank: BoardRank, file: BoardFile) -> Piece? {
+        if Self.isValidRank(rank: rank) && Self.isValidFile(file: file) {
+            return position[rank][file]
         }
+        return nil
     }
     
-    func isPlayerInCheck(player: PlayerColor) -> Bool {
-        
-        var kingRank: Int? = nil
-        var kingFile: Int? = nil
-        
-        // Find the king
-        for rank in 0...7 {
-            for file in 0...7 {
-                if let piece = self.pieceAt(rank: rank, file: file) {
-                    if piece.type == .king && piece.color == player {
-                        kingRank = rank
-                        kingFile = file
+    /**
+     Returns all of a player's pieces on a chessboard.
+     
+     - Parameters:
+        - player: Color of the player whose pieces should be returned.
+     
+     - Returns: An array of `(Piece, BoardSquare)` pairs, each representing a piece and its square.
+     */
+    func piecesForPlayer(player: PlayerColor) -> [(Piece, BoardSquare)] {
+        var pieces: [(Piece, BoardSquare)] = []
+        for rankIndex in 0...7 {
+            for fileIndex in 0...7 {
+                if let piece = position[rankIndex][fileIndex] {
+                    if piece.color == player {
+                        pieces.append((piece, BoardSquare(rank: rankIndex, file: fileIndex)))
                     }
                 }
             }
         }
-        
-        // Ensure the king is actually on the board
-        guard let kingRank = kingRank, let kingFile = kingFile else {
-            return true
-        }
-        
-        for (rankDirection, fileDirection) in Self.horizontalDirections {
-            var candidateSquare = BoardSquare(rank: kingRank + rankDirection, file: kingFile + fileDirection)
-            while (true) {
-                if !candidateSquare.isValidSquare {
-                    break
-                }
-                let piece = self.pieceAt(rank: candidateSquare.rank, file: candidateSquare.file)
-                if piece != nil && piece!.color == player.nextColor && (piece!.type == .rook || piece!.type == .queen) {
-                    return true
-                } else if piece != nil {
-                    break
-                }
-                candidateSquare = BoardSquare(rank: candidateSquare.rank + rankDirection, file: candidateSquare.file + fileDirection)
-            }
-        }
-        
-        for (rankDirection, fileDirection) in Self.diagionalDirections {
-            var candidateSquare = BoardSquare(rank: kingRank + rankDirection, file: kingFile + fileDirection)
-            while (true) {
-                if !candidateSquare.isValidSquare {
-                    break
-                }
-                let piece = self.pieceAt(rank: candidateSquare.rank, file: candidateSquare.file)
-                if piece != nil && piece!.color == player.nextColor && (piece!.type == .bishop || piece!.type == .queen) {
-                    return true
-                } else if piece != nil {
-                    break
-                }
-                candidateSquare = BoardSquare(rank: candidateSquare.rank + rankDirection, file: candidateSquare.file + fileDirection)
-            }
-        }
-        
-        for (rankDirection, fileDirection) in Self.diagionalDirections {
-            let candidateSquares = [
-                BoardSquare(rank: kingRank + rankDirection * 2, file: kingFile + fileDirection * 1),
-                BoardSquare(rank: kingRank + rankDirection * 1, file: kingFile + fileDirection * 2),
-            ]
-            for candidateSquare in candidateSquares {
-                if let piece = self.pieceAt(rank: candidateSquare.rank, file: candidateSquare.file) {
-                    if piece.color == player.nextColor && piece.type == .knight {
-                        return true
-                    }
-                }
-            }
-        }
-        
-        // Check for pawn checks
-        let candidateSquares = [
-            BoardSquare(rank: player == .white ? kingRank - 1 : kingRank + 1, file: kingFile - 1),
-            BoardSquare(rank: player == .white ? kingRank - 1 : kingRank + 1, file: kingFile + 1),
-        ]
-        for candidateSquare in candidateSquares {
-            if let piece = self.pieceAt(rank: candidateSquare.rank, file: candidateSquare.file) {
-                if piece.color == player.nextColor && piece.type == .pawn {
-                    return true
-                }
-            }
-        }
-        
-        return false
+        return pieces
     }
-    
-    func isPlayerInCheckmate(player: PlayerColor) -> Bool {
-        // It must be the player's turn to be in checkmate
-        if self.playerToMove != player {
-            return false
-        }
-        
-        // Player must be in check to be in checkmate
-        if !self.isPlayerInCheck(player: player) {
-            return false
-        }
-        
-        // If player has existing legal moves, they're not in checkmate
-        if !self.legalMoves.isEmpty {
-            return false
-        }
-        
-        // Otherwise, compute moves in case they weren't already computed
-        self.computeAndSaveLegalMoves()
-        return self.legalMoves.isEmpty
-    }
-    
-    func computeLegalMoves() -> [Move] {
-        
-        // Reset legal moves to be empty array
-        var moves: [Move] = []
-        
-        let playerToMove = self.playerToMove
-        let playerPieces = self.piecesForPlayer(player: playerToMove)
-        
-        // Check for all possible moves
-        for (piece, currentSquare) in playerPieces {
-            switch (piece.type) {
-            case .pawn:
-                
-                let nextRank = playerToMove == .white ? currentSquare.rank - 1 : currentSquare.rank + 1
-                
-                // Allow pawns to move one square forward
-                let nextSquare = BoardSquare(rank: nextRank, file: currentSquare.file)
-                let squareInfo = self.isValidMovementSquare(square: nextSquare, player: playerToMove)
-                if squareInfo.isValid && !squareInfo.isCapture {
-                    
-                    if nextRank == (playerToMove == .white ? 0 : 7) {
-                        // Promotion
-                        for pieceType in [PieceType.queen, PieceType.rook, PieceType.knight, PieceType.bishop] {
-                            moves.append(Move(withPawnPromoting: piece, toPiece: pieceType, startSquare: currentSquare, endSquare: nextSquare, isCapture: false))
-                        }
-                    } else {
-                        // Non-promotion
-                        moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: nextSquare, isCapture: false))
-                        
-                        // Allow pawns to move two squares forward on the first move
-                        if currentSquare.rank == (playerToMove == .white ? 6 : 1) {
-                            let twoSquaresAhead = BoardSquare(rank: playerToMove == .white ? currentSquare.rank - 2 : currentSquare.rank + 2, file: currentSquare.file)
-                            let twoSquareInfo = self.isValidMovementSquare(square: twoSquaresAhead, player: playerToMove)
-                            if twoSquareInfo.isValid && !twoSquareInfo.isCapture {
-                                moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: twoSquaresAhead, isCapture: false))
-                            }
-                        }
-                    }
-                }
-                
-                // Pawns can capture diagonally
-                let capturingSquares = [
-                    BoardSquare(rank: nextRank, file: currentSquare.file - 1),
-                    BoardSquare(rank: nextRank, file: currentSquare.file + 1)
-                ]
-                for capturingSquare in capturingSquares {
-                    let squareInfo = self.isValidMovementSquare(square: capturingSquare, player: playerToMove)
-                    if squareInfo.isValid && squareInfo.isCapture {
-                        if nextRank == (playerToMove == .white ? 0 : 7) {
-                            // Promotion
-                            for pieceType in [PieceType.queen, PieceType.rook, PieceType.knight, PieceType.bishop] {
-                                moves.append(Move(withPawnPromoting: piece, toPiece: pieceType, startSquare: currentSquare, endSquare: capturingSquare, isCapture: true))
-                            }
-                        } else {
-                            // Non-Promotion
-                            moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: capturingSquare, isCapture: true))
-                        }
-                    }
-                }
-                
-                // Check if En Passant is allowed
-                if let enPassantTarget = enPassantTarget {
-                    if currentSquare.rank == (playerToMove == .white ? 3 : 4) && enPassantTarget.rank == (playerToMove == .white ? 2 : 5) && abs(enPassantTarget.file - currentSquare.file) == 1 {
-                        moves.append(Move(withEnPassantByPawn: piece, startSquare: currentSquare, endSquare: BoardSquare(rank: playerToMove == .white ? 2 : 5, file: enPassantTarget.file)))
-                    }
-                }
 
-            case .knight:
-                
-                for (rankDirection, fileDirection) in Self.diagionalDirections {
-                    let possibleSquares = [
-                        BoardSquare(rank: currentSquare.rank + rankDirection * 2, file: currentSquare.file + fileDirection * 1),
-                        BoardSquare(rank: currentSquare.rank + rankDirection * 1, file: currentSquare.file + fileDirection * 2),
-                    ]
-                    for possibleSquare in possibleSquares {
-                        let squareInfo = self.isValidMovementSquare(square: possibleSquare, player: playerToMove)
-                        if squareInfo.isValid {
-                            moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: possibleSquare, isCapture: squareInfo.isCapture))
-                        }
-                    }
-                }
-
-            case .bishop:
-                
-                for (rankDirection, fileDirection) in Self.diagionalDirections {
-                    var candidateSquare = BoardSquare(rank: currentSquare.rank + rankDirection, file: currentSquare.file + fileDirection)
-                    while (true) {
-                        let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
-                        if squareInfo.isValid {
-                            moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
-                            if squareInfo.isCapture {
-                                break
-                            }
-                            candidateSquare = BoardSquare(rank: candidateSquare.rank + rankDirection, file: candidateSquare.file + fileDirection)
-                        } else {
-                            break
-                        }
-                    }
-                }
-
-            case .rook:
-                
-                for (rankDirection, fileDirection) in Self.horizontalDirections {
-                    var candidateSquare = BoardSquare(rank: currentSquare.rank + rankDirection, file: currentSquare.file + fileDirection)
-                    while (true) {
-                        let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
-                        if squareInfo.isValid {
-                            moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
-                            if squareInfo.isCapture {
-                                break
-                            }
-                            candidateSquare = BoardSquare(rank: candidateSquare.rank + rankDirection, file: candidateSquare.file + fileDirection)
-                        } else {
-                            break
-                        }
-                    }
-                }
-                
-            case .queen:
-                
-                for (rankDirection, fileDirection) in Self.horizontalDirections + Self.diagionalDirections {
-                    var candidateSquare = BoardSquare(rank: currentSquare.rank + rankDirection, file: currentSquare.file + fileDirection)
-                    while (true) {
-                        let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
-                        if squareInfo.isValid {
-                            moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
-                            if squareInfo.isCapture {
-                                break
-                            }
-                            candidateSquare = BoardSquare(rank: candidateSquare.rank + rankDirection, file: candidateSquare.file + fileDirection)
-                        } else {
-                            break
-                        }
-                    }
-                }
-                
-            case .king:
-                
-                for (rankDirection, fileDirection) in Self.horizontalDirections + Self.diagionalDirections {
-                    let candidateSquare = BoardSquare(rank: currentSquare.rank + rankDirection, file: currentSquare.file + fileDirection)
-                    let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
-                    if squareInfo.isValid {
-                        moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
-                    }
-                }
-                
-                // Castling
-                // Requirements:
-                // - Cannot castle if currently in check
-                // - King and rook cannot have previously moved
-                // - No pieces in between king and rook
-                // - King does not pass through check
-                if !self.isPlayerInCheck(player: playerToMove) {
-                    
-                    if playerToMove == .white && self.whiteRightToCastleKingside {
-                        
-                        let betweenSquares = [BoardSquare(rank: 7, file: 5), BoardSquare(rank: 7, file: 6)]
-                        let intermediateSquare = BoardSquare(rank: 7, file: 5)
-                        if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
-                            if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
-                                moves.append(Move(withPieceCastlingShort: piece))
-                            }
-                        }
-                    }
-                    if playerToMove == .white && self.whiteRightToCastleQueenside {
-                        let betweenSquares = [BoardSquare(rank: 7, file: 1), BoardSquare(rank: 7, file: 2), BoardSquare(rank: 7, file: 3)]
-                        let intermediateSquare = BoardSquare(rank: 7, file: 3)
-                        if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
-                            if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
-                                moves.append(Move(withPieceCastlingLong: piece))
-                            }
-                        }
-                    }
-                    if playerToMove == .black && self.blackRightToCastleKingside {
-                        let betweenSquares = [BoardSquare(rank: 0, file: 5), BoardSquare(rank: 0, file: 6)]
-                        let intermediateSquare = BoardSquare(rank: 0, file: 5)
-                        if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
-                            if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
-                                moves.append(Move(withPieceCastlingShort: piece))
-                            }
-                        }
-                    }
-                    if playerToMove == .black && self.blackRightToCastleQueenside {
-                        let betweenSquares = [BoardSquare(rank: 0, file: 1), BoardSquare(rank: 0, file: 2), BoardSquare(rank: 0, file: 3)]
-                        let intermediateSquare = BoardSquare(rank: 0, file: 3)
-                        if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
-                            if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
-                                moves.append(Move(withPieceCastlingLong: piece))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        return moves.filter { move in
-            let tmpBoard = self.getChessboardAfterMove(move: move, computeNextLegalMoves: false)
-            return !tmpBoard.isPlayerInCheck(player: move.piece.color)
-        }
-    }
-    
-    func legalMovesForPieceAtSquare(square: BoardSquare) -> [Move] {
-        return Array(self.legalMoves.values.filter { move in
-            move.startSquare == square
-        })
-    }
-    
-    // Interpreting UCI move sequence
-    func movesFromUCIVariation(sequence: [String]) -> (Move?, String) {
-        var firstMove: Move? = nil
-        var line: String = ""
-        
-        var currentBoard: Chessboard = self
-        
-        for moveText in sequence {
-            if moveText.count != 4 && moveText.count != 5 {
-                continue
-            }
-            
-            let startFile = Chessboard.fileFromSan(string: String(moveText[moveText.index(moveText.startIndex, offsetBy: 0)])) ?? 0
-            let startRank = Int(String(moveText[moveText.index(moveText.startIndex, offsetBy: 1)])) ?? 0
-            let startSquare = BoardSquare(rank: 8 - startRank, file: startFile)
-            let endFile = Chessboard.fileFromSan(string: String(moveText[moveText.index(moveText.startIndex, offsetBy: 2)])) ?? 0
-            let endRank = Int(String(moveText[moveText.index(moveText.startIndex, offsetBy: 3)])) ?? 0
-            let endSquare = BoardSquare(rank: 8 - endRank, file: endFile)
-            let promotion: PieceType? = moveText.count == 5 ? PieceType.fromDescription(description: String(moveText[moveText.index(moveText.startIndex, offsetBy: 4)])) : nil
-            
-            for (notation, move) in currentBoard.legalMoves {
-                if move.startSquare == startSquare && move.endSquare == endSquare && move.promotion == promotion {
-                    
-                    if move.piece.color == .white {
-                        line += String(currentBoard.fullmoveNumber) + ". " + notation + " "
-                    } else if firstMove == nil {
-                        line += String(currentBoard.fullmoveNumber) + "... " + notation + " "
-                    } else {
-                        line += notation + " "
-                    }
-                    
-                    if firstMove == nil {
-                        firstMove = move
-                    }
-                    
-                    currentBoard = currentBoard.getChessboardAfterMove(move: move)
-                    break
-                }
-            }
-        }
-        
-        return (firstMove, line)
+    /**
+     Generates a new empty chess position.
+     
+     - Returns: A `ChessPosition` representing a board with all empty squares.
+     */
+    static func emptyPosition() -> ChessPosition {
+        return [[Piece?]](repeating: [Piece?](repeating: nil, count: 8), count: 8)
     }
 }

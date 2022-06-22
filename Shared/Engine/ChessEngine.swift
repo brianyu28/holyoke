@@ -20,9 +20,7 @@ class ChessEngine: ObservableObject {
     static let sharedInstance = ChessEngine()
     
     var currentBoard: Chessboard?
-    @Published var task: Process?
-    
-    // TODO: Make this not a string?
+    @Published var task: Process?    
     @Published var lines: [Line?]
     
     // TODO: Allow configuration of these parameters
