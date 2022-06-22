@@ -24,8 +24,8 @@ extension Chessboard {
         // Find the king
         var kingRank: Int? = nil
         var kingFile: Int? = nil
-        for rank in 0...7 {
-            for file in 0...7 {
+        for rank in Self.ranks {
+            for file in Self.files {
                 if let piece = self.pieceAt(rank: rank, file: file) {
                     if piece.type == .king && piece.color == player {
                         kingRank = rank
@@ -43,7 +43,7 @@ extension Chessboard {
         // Check if a rook or queen is attacking the king
         for (rankDirection, fileDirection) in Self.horizontalDirections {
             var candidateSquare = BoardSquare(rank: kingRank + rankDirection, file: kingFile + fileDirection)
-            while (true) {
+            while true {
                 if !candidateSquare.isValidSquare {
                     break
                 }

@@ -28,6 +28,11 @@ extension Chessboard {
     static let kingStartFile: BoardFile = Chessboard.eFile
     static let kingShortCastleEndFile: BoardFile = Chessboard.gFile
     static let kingLongCastleEndFile: BoardFile = Chessboard.cFile
+    
+    /**
+     Range of all possible files.
+     */
+    static let files: ClosedRange<Int> = 0...7
 
     /**
      Computes whether the file is a valid file on the chessboard.

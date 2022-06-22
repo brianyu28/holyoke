@@ -50,7 +50,7 @@ extension Chessboard {
         
         // Check for all possible moves
         for (piece, currentSquare) in self.piecesForPlayer(player: playerToMove) {
-            switch (piece.type) {
+            switch piece.type {
             case .pawn:
                 
                 let nextRank = playerToMove == .white ? currentSquare.rank - 1 : currentSquare.rank + 1
@@ -59,19 +59,29 @@ extension Chessboard {
                 let nextSquare = BoardSquare(rank: nextRank, file: currentSquare.file)
                 let squareInfo = self.isValidMovementSquare(square: nextSquare, player: playerToMove)
                 if squareInfo.isValid && !squareInfo.isCapture {
-                    
-                    if nextRank == (playerToMove == .white ? 0 : 7) {
+                    if nextRank == (playerToMove == .white ? Self.whitePromotionRank : Self.blackPromotionRank) {
                         // Promotion
                         for pieceType in [PieceType.queen, PieceType.rook, PieceType.knight, PieceType.bishop] {
-                            moves.append(Move(withPawnPromoting: piece, toPiece: pieceType, startSquare: currentSquare, endSquare: nextSquare, isCapture: false))
+                            moves.append(
+                                Move(
+                                    withPawnPromoting: piece,
+                                    toPiece: pieceType,
+                                    startSquare: currentSquare,
+                                    endSquare: nextSquare,
+                                    isCapture: false
+                                )
+                            )
                         }
                     } else {
                         // Non-promotion
                         moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: nextSquare, isCapture: false))
                         
                         // Allow pawns to move two squares forward on the first move
-                        if currentSquare.rank == (playerToMove == .white ? 6 : 1) {
-                            let twoSquaresAhead = BoardSquare(rank: playerToMove == .white ? currentSquare.rank - 2 : currentSquare.rank + 2, file: currentSquare.file)
+                        if currentSquare.rank == (playerToMove == .white ? Self.whitePawnStartRank : Self.blackPawnStartRank) {
+                            let twoSquaresAhead = BoardSquare(
+                                rank: playerToMove == .white ? currentSquare.rank - 2 : currentSquare.rank + 2,
+                                file: currentSquare.file
+                            )
                             let twoSquareInfo = self.isValidMovementSquare(square: twoSquaresAhead, player: playerToMove)
                             if twoSquareInfo.isValid && !twoSquareInfo.isCapture {
                                 moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: twoSquaresAhead, isCapture: false))
@@ -88,10 +98,18 @@ extension Chessboard {
                 for capturingSquare in capturingSquares {
                     let squareInfo = self.isValidMovementSquare(square: capturingSquare, player: playerToMove)
                     if squareInfo.isValid && squareInfo.isCapture {
-                        if nextRank == (playerToMove == .white ? 0 : 7) {
+                        if nextRank == (playerToMove == .white ? Self.whitePromotionRank : Self.blackPromotionRank) {
                             // Promotion
                             for pieceType in [PieceType.queen, PieceType.rook, PieceType.knight, PieceType.bishop] {
-                                moves.append(Move(withPawnPromoting: piece, toPiece: pieceType, startSquare: currentSquare, endSquare: capturingSquare, isCapture: true))
+                                moves.append(
+                                    Move(
+                                        withPawnPromoting: piece,
+                                        toPiece: pieceType,
+                                        startSquare: currentSquare,
+                                        endSquare: capturingSquare,
+                                        isCapture: true
+                                    )
+                                )
                             }
                         } else {
                             // Non-Promotion
@@ -102,8 +120,19 @@ extension Chessboard {
                 
                 // Check if En Passant is allowed
                 if let enPassantTarget = enPassantTarget {
-                    if currentSquare.rank == (playerToMove == .white ? 3 : 4) && enPassantTarget.rank == (playerToMove == .white ? 2 : 5) && abs(enPassantTarget.file - currentSquare.file) == 1 {
-                        moves.append(Move(withEnPassantByPawn: piece, startSquare: currentSquare, endSquare: BoardSquare(rank: playerToMove == .white ? 2 : 5, file: enPassantTarget.file)))
+                    if currentSquare.rank == (playerToMove == .white ? Self.whiteEnPassantTargetRank + 1 : Self.blackEnPassantTargetRank - 1) &&
+                        enPassantTarget.rank == (playerToMove == .white ? Self.whiteEnPassantTargetRank : Self.blackEnPassantTargetRank) &&
+                        abs(enPassantTarget.file - currentSquare.file) == 1 {
+                        moves.append(
+                            Move(
+                                withEnPassantByPawn: piece,
+                                startSquare: currentSquare,
+                                endSquare: BoardSquare(
+                                    rank: playerToMove == .white ? Self.whiteEnPassantTargetRank : Self.blackEnPassantTargetRank,
+                                    file: enPassantTarget.file
+                                )
+                            )
+                        )
                     }
                 }
 
@@ -126,7 +155,7 @@ extension Chessboard {
                 
                 for (rankDirection, fileDirection) in Self.diagionalDirections {
                     var candidateSquare = BoardSquare(rank: currentSquare.rank + rankDirection, file: currentSquare.file + fileDirection)
-                    while (true) {
+                    while true {
                         let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
                         if squareInfo.isValid {
                             moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
@@ -144,7 +173,7 @@ extension Chessboard {
                 
                 for (rankDirection, fileDirection) in Self.horizontalDirections {
                     var candidateSquare = BoardSquare(rank: currentSquare.rank + rankDirection, file: currentSquare.file + fileDirection)
-                    while (true) {
+                    while true {
                         let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
                         if squareInfo.isValid {
                             moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
@@ -162,7 +191,7 @@ extension Chessboard {
                 
                 for (rankDirection, fileDirection) in Self.horizontalDirections + Self.diagionalDirections {
                     var candidateSquare = BoardSquare(rank: currentSquare.rank + rankDirection, file: currentSquare.file + fileDirection)
-                    while (true) {
+                    while true {
                         let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
                         if squareInfo.isValid {
                             moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
@@ -196,8 +225,8 @@ extension Chessboard {
                     
                     if playerToMove == .white && self.whiteRightToCastleKingside {
                         
-                        let betweenSquares = [BoardSquare(rank: 7, file: 5), BoardSquare(rank: 7, file: 6)]
-                        let intermediateSquare = BoardSquare(rank: 7, file: 5)
+                        let betweenSquares = [BoardSquare(rank: Self.whiteCastlingRank, file: Self.fFile), BoardSquare(rank: Self.whiteCastlingRank, file: Self.gFile)]
+                        let intermediateSquare = BoardSquare(rank: Self.whiteCastlingRank, file: Self.fFile)
                         if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
                             if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
                                 moves.append(Move(withPieceCastlingShort: piece))
@@ -205,8 +234,8 @@ extension Chessboard {
                         }
                     }
                     if playerToMove == .white && self.whiteRightToCastleQueenside {
-                        let betweenSquares = [BoardSquare(rank: 7, file: 1), BoardSquare(rank: 7, file: 2), BoardSquare(rank: 7, file: 3)]
-                        let intermediateSquare = BoardSquare(rank: 7, file: 3)
+                        let betweenSquares = [BoardSquare(rank: Self.whiteCastlingRank, file: Self.bFile), BoardSquare(rank: Self.whiteCastlingRank, file: Self.cFile), BoardSquare(rank: 7, file: Self.dFile)]
+                        let intermediateSquare = BoardSquare(rank: Self.whiteCastlingRank, file: Self.dFile)
                         if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
                             if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
                                 moves.append(Move(withPieceCastlingLong: piece))
@@ -214,8 +243,8 @@ extension Chessboard {
                         }
                     }
                     if playerToMove == .black && self.blackRightToCastleKingside {
-                        let betweenSquares = [BoardSquare(rank: 0, file: 5), BoardSquare(rank: 0, file: 6)]
-                        let intermediateSquare = BoardSquare(rank: 0, file: 5)
+                        let betweenSquares = [BoardSquare(rank: Self.blackCastlingRank, file: Self.fFile), BoardSquare(rank: Self.blackCastlingRank, file: Self.gFile)]
+                        let intermediateSquare = BoardSquare(rank: Self.blackCastlingRank, file: Self.fFile)
                         if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
                             if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
                                 moves.append(Move(withPieceCastlingShort: piece))
@@ -223,8 +252,8 @@ extension Chessboard {
                         }
                     }
                     if playerToMove == .black && self.blackRightToCastleQueenside {
-                        let betweenSquares = [BoardSquare(rank: 0, file: 1), BoardSquare(rank: 0, file: 2), BoardSquare(rank: 0, file: 3)]
-                        let intermediateSquare = BoardSquare(rank: 0, file: 3)
+                        let betweenSquares = [BoardSquare(rank: Self.blackCastlingRank, file: Self.bFile), BoardSquare(rank: Self.blackCastlingRank, file: Self.cFile), BoardSquare(rank: Self.blackCastlingRank, file: Self.dFile)]
+                        let intermediateSquare = BoardSquare(rank: Self.blackCastlingRank, file: Self.dFile)
                         if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
                             if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
                                 moves.append(Move(withPieceCastlingLong: piece))
@@ -236,8 +265,8 @@ extension Chessboard {
         }
         
         return moves.filter { move in
-            let tmpBoard = self.getChessboardAfterMove(move: move, computeNextLegalMoves: false)
-            return !tmpBoard.isPlayerInCheck(player: move.piece.color)
+            let board = self.getChessboardAfterMove(move: move, computeNextLegalMoves: false)
+            return !board.isPlayerInCheck(player: move.piece.color)
         }
     }
     
@@ -253,6 +282,7 @@ extension Chessboard {
         let moveList = self.legalMovesInCurrentPosition()
         for move in moveList {
             
+            // Suffix for move SAN indicates whether move is check or checkmate
             var suffix = ""
             let board = self.getChessboardAfterMove(move: move, computeNextLegalMoves: false)
             if board.isPlayerInCheck(player: board.playerToMove) {
@@ -262,6 +292,8 @@ extension Chessboard {
                     suffix = "+"
                 }
             }
+            
+            // Pawns and castling have different SAN notation
             if move.piece.type == .pawn {
                 var moveName = ""
                 if move.isCapture {
@@ -277,6 +309,8 @@ extension Chessboard {
             } else if move.isCastleLong {
                 self.legalMoves["0-0-0" + suffix] = move
             } else {
+                
+                // If there are ambiguous moves, use file and/or rank to disambiguate
                 let ambiguousMoves = moveList.filter { otherMove in
                     move.piece.type == otherMove.piece.type &&
                     move.endSquare.rank == otherMove.endSquare.rank &&
@@ -320,8 +354,8 @@ extension Chessboard {
         
         // Create a new position based on the current position
         var newPosition = Self.emptyPosition()
-        for rank in 0...7 {
-            for file in 0...7 {
+        for rank in Self.ranks {
+            for file in Self.files {
                 newPosition[rank][file] = self.position[rank][file]
             }
         }
@@ -341,24 +375,24 @@ extension Chessboard {
         
         // Check for castling
         if move.isCastleShort {
-            let rookRank = piece.color == .white ? 7 : 0
-            let rookStartFile = 7
-            let rookEndFile = 5
+            let rookRank = Self.castlingRankFor(color: piece.color)
+            let rookStartFile = Self.hFile
+            let rookEndFile = Self.fFile
             newPosition[rookRank][rookEndFile] = newPosition[rookRank][rookStartFile]
             newPosition[rookRank][rookStartFile] = nil
         } else if move.isCastleLong {
-            let rookRank = piece.color == .white ? 7 : 0
-            let rookStartFile = 0
-            let rookEndFile = 3
+            let rookRank = Self.castlingRankFor(color: piece.color)
+            let rookStartFile = Self.aFile
+            let rookEndFile = Self.dFile
             newPosition[rookRank][rookEndFile] = newPosition[rookRank][rookStartFile]
             newPosition[rookRank][rookStartFile] = nil
         }
         
         let enPassantTarget: BoardSquare? = {
-            if move.piece.type == .pawn && move.piece.color == .white && move.startSquare.rank == 6 && move.endSquare.rank == 4 {
-                return BoardSquare(rank: 5, file: move.startSquare.file)
-            } else if move.piece.type == .pawn && move.piece.color == .black && move.startSquare.rank == 1 && move.endSquare.rank == 3 {
-                return BoardSquare(rank: 2, file: move.startSquare.file)
+            if move.piece.type == .pawn && move.piece.color == .white && move.startSquare.rank == Self.whitePawnStartRank && move.endSquare.rank == Self.whitePawnStartRank - 2 {
+                return BoardSquare(rank: Self.blackEnPassantTargetRank, file: move.startSquare.file)
+            } else if move.piece.type == .pawn && move.piece.color == .black && move.startSquare.rank == Self.blackPawnStartRank && move.endSquare.rank == Self.blackPawnStartRank + 2 {
+                return BoardSquare(rank: Self.whiteEnPassantTargetRank, file: move.startSquare.file)
             } else {
                 return nil
             }
@@ -366,19 +400,23 @@ extension Chessboard {
         
         let whiteRightToCastleKingside = self.whiteRightToCastleKingside &&
             !(move.piece.color == .white && move.piece.type == .king) &&
-            !(move.piece.color == .white && move.piece.type == .rook && move.startSquare.rank == 7 && move.startSquare.file == 7)
+            !(move.piece.color == .white && move.piece.type == .rook &&
+              move.startSquare.rank == Self.whiteCastlingRank && move.startSquare.file == Self.hFile)
         
         let whiteRightToCastleQueenside = self.whiteRightToCastleQueenside &&
             !(move.piece.color == .white && move.piece.type == .king) &&
-            !(move.piece.color == .white && move.piece.type == .rook && move.startSquare.rank == 7 && move.startSquare.file == 0)
+            !(move.piece.color == .white && move.piece.type == .rook &&
+              move.startSquare.rank == Self.whiteCastlingRank && move.startSquare.file == Self.aFile)
         
         let blackRightToCastleKingside = self.blackRightToCastleKingside &&
             !(move.piece.color == .black && move.piece.type == .king) &&
-            !(move.piece.color == .black && move.piece.type == .rook && move.startSquare.rank == 0 && move.startSquare.file == 7)
+            !(move.piece.color == .black && move.piece.type == .rook &&
+              move.startSquare.rank == Self.blackCastlingRank && move.startSquare.file == Self.hFile)
         
         let blackRightToCastleQueenside = self.blackRightToCastleQueenside &&
             !(move.piece.color == .black && move.piece.type == .king) &&
-            !(move.piece.color == .black && move.piece.type == .rook && move.startSquare.rank == 0 && move.startSquare.file == 0)
+            !(move.piece.color == .black && move.piece.type == .rook &&
+              move.startSquare.rank == Self.blackCastlingRank && move.startSquare.file == Self.aFile)
         
         let board = Chessboard(
             position: newPosition,

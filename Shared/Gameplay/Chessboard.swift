@@ -160,11 +160,11 @@ class Chessboard : CustomStringConvertible {
      */
     func piecesForPlayer(player: PlayerColor) -> [(Piece, BoardSquare)] {
         var pieces: [(Piece, BoardSquare)] = []
-        for rankIndex in 0...7 {
-            for fileIndex in 0...7 {
-                if let piece = position[rankIndex][fileIndex] {
+        for rank in Self.ranks {
+            for file in Self.files {
+                if let piece = position[rank][file] {
                     if piece.color == player {
-                        pieces.append((piece, BoardSquare(rank: rankIndex, file: fileIndex)))
+                        pieces.append((piece, BoardSquare(rank: rank, file: file)))
                     }
                 }
             }
@@ -178,6 +178,6 @@ class Chessboard : CustomStringConvertible {
      - Returns: A `ChessPosition` representing a board with all empty squares.
      */
     static func emptyPosition() -> ChessPosition {
-        return [[Piece?]](repeating: [Piece?](repeating: nil, count: 8), count: 8)
+        return [[Piece?]](repeating: [Piece?](repeating: nil, count: Self.files.count), count: Self.ranks.count)
     }
 }

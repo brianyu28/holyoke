@@ -27,6 +27,17 @@ extension Chessboard {
     // Constants representing ranks with special meanings
     static let whiteCastlingRank: BoardRank = Chessboard.firstRank
     static let blackCastlingRank: BoardRank = Chessboard.eighthRank
+    static let whitePromotionRank: BoardRank = Chessboard.eighthRank
+    static let blackPromotionRank: BoardRank = Chessboard.firstRank
+    static let whitePawnStartRank: BoardRank = Chessboard.secondRank
+    static let blackPawnStartRank: BoardRank = Chessboard.seventhRank
+    static let whiteEnPassantTargetRank: BoardRank = Chessboard.sixthRank
+    static let blackEnPassantTargetRank: BoardRank = Chessboard.thirdRank
+    
+    /**
+     Range of all possible ranks.
+     */
+    static let ranks: ClosedRange<Int> = 0...7
 
     /**
      Computes whether the rank is a valid rank on the chessboard.
