@@ -42,7 +42,7 @@ extension Chessboard {
      
      - Returns: `true` if the file is a valid file on the board, `false` otherwise.
      */
-    static func isValidFile(file: BoardFile) -> Bool { (0...7).contains(file) }
+    static func isValidFile(file: BoardFile) -> Bool { Self.files.contains(file) }
     
     /**
      Returns a board file based on the SAN algebraic notation representation of the file.

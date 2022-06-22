@@ -47,7 +47,7 @@ extension Chessboard {
      
      - Returns: `true` if the rank is a valid rank on the board, `false` otherwise.
      */
-    static func isValidRank(rank: BoardRank) -> Bool { (0...7).contains(rank) }
+    static func isValidRank(rank: BoardRank) -> Bool { Self.ranks.contains(rank) }
     
     /**
      Returns a board rank based on the SAN algebraic notation representation of the rank.

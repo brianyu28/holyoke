@@ -11,7 +11,15 @@ import Foundation
  `Chessboard` logic for interpreting a UCI move sequence.
  */
 extension Chessboard {
-    // Interpreting UCI move sequence
+    /**
+     Converts a move sequence from a UCI engine into SAN.
+     
+     - Parameters:
+        - sequence: Array of moves in long algebraic notation (e.g. "e2e4").
+     
+     - Returns: A pair (`Move?`, `String`) where the `Move` is the first move of the line,
+     and the `String` is the SAN notation for the line.
+     */
     func movesFromUCIVariation(sequence: [String]) -> (Move?, String) {
         var firstMove: Move? = nil
         var line: String = ""

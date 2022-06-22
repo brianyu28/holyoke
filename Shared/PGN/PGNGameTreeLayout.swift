@@ -23,6 +23,14 @@ struct GameLayoutPoint: Hashable, Equatable {
  Logic for handling node layout of a PGN Game.
  */
 extension PGNGame {
+    
+    /**
+     Lay out all nodes in the game on a 2D grid.
+     
+     - Returns: A pair `(layout, locations)`.
+     `layout` is a 2D array representing a grid of where the nodes should appear in 2D space.
+     `locations` is a mapping from node IDs to the row in which they should appear in the final layout.
+     */
     func generateNodeLayout() -> (layout: [[PGNGameNode?]], locations: [Int: Int]) {
         
         // 2D array of (row, col) for where PGNGameNodes are laid out

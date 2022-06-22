@@ -15,8 +15,14 @@ enum PGNGameTermination: String, CaseIterable {
 }
 
 class PGNGame: Identifiable {
-    // Incremenets to keep track of unique game IDs
+    /**
+     Private counter to keep track of unique game IDs.
+     */
     static private var inc: Int = 0
+    
+    /**
+     Unique identifier for game.
+     */
     let id: Int
     
     /**
@@ -34,6 +40,10 @@ class PGNGame: Identifiable {
      */
     var gameTermination: PGNGameTermination
     
+    /**
+     Initialize a new game.
+     Game starts with no metadata, a single root node without a parent, and a termination of `*`.
+     */
     init() {
         Self.inc += 1
         self.id = Self.inc
@@ -43,14 +53,23 @@ class PGNGame: Identifiable {
         gameTermination = .asterisk
     }
     
+    /**
+     The name of the white player, or `"White"` if not present in the metadata.
+     */
     var whitePlayerName: String {
         return self.getMetadata(query: "White") ?? "White"
     }
     
+    /**
+     The name of the black player, or `"Black"` if not present in the metadata.
+     */
     var blackPlayerName: String {
         return self.getMetadata(query: "Black") ?? "Black"
     }
     
+    /**
+     Description for the title of the game. Includes the player names in addition to the date, if present in the metadata.
+     */
     var gameTitleDescription: String {
         let date = self.getMetadata(query: "Date")
         let dateString: String = (date == nil || date == "????.??.??") ? "" : " (\(date!))"
@@ -58,6 +77,11 @@ class PGNGame: Identifiable {
         return "\(whitePlayerName) – \(blackPlayerName)\(dateString)"
     }
     
+    /**
+     The starting `Chessboard` for the game.
+     For new games, and for most games, this is the initial starting position for the game of chess.
+     However, PGN allows for a `"SetUp"` tag where, if its value is `"1"`, then the `"FEN"` tag is used for the starting position.
+     */
     var startingPosition: Chessboard {
         if self.getMetadata(query: "SetUp") != "1" {
             return Chessboard.initInStartingPosition()
@@ -71,6 +95,14 @@ class PGNGame: Identifiable {
         return board
     }
     
+    /**
+     Get game metadata based on a tag name.
+     
+     - Parameters:
+        - query: The field name to search for in the metadata.
+     
+     - Returns: The metadata value for the field, or `nil` if the field is not in the metadata.
+     */
     func getMetadata(query: String) -> String? {
         for (field: field, value: value) in metadata {
             if field == query {
@@ -80,10 +112,23 @@ class PGNGame: Identifiable {
         return nil
     }
     
+    /**
+     Remove a field from the game's metadata.
+     
+     - Parameters:
+        - field: The field name to remove from the metadata.
+     */
     func removeMetadata(field: String) {
         self.metadata.removeAll(where: { (f: String, _: String) in f == field })
     }
     
+    /**
+     Updates the game metadata for a given field.
+     
+     - Parameters:
+        - field: The field name to update in the metadata.
+        - value: The value that should be set for the metadata field.
+     */
     func setMetadata(field: String, value: String) {
         for i in metadata.indices {
             if metadata[i].field == field {
@@ -96,6 +141,13 @@ class PGNGame: Identifiable {
         metadata.append((field: field, value: value))
     }
     
+    /**
+     Updates the starting position of the game.
+     If the starting position is different from the starting position of chess, this requires `"SetUp"` and `"FEN"` tags.
+     
+     - Parameters:
+        - fen: FEN representation of the starting position.
+     */
     func setStartingPosition(fen: String) {
         if fen == Chessboard.startingPositionFEN {
             self.removeMetadata(field: "SetUp")
@@ -106,7 +158,9 @@ class PGNGame: Identifiable {
         }
     }
     
-    // Ensure that the required STR (Steven Tag Roster) tags are present
+    /**
+     Ensure that the required STR (Steven Tag Roster) tags are present in the game.
+     */
     func completeSTRMetadata() {
         let requiredTags = [
             (field: "Event", value: "???"),
@@ -124,6 +178,11 @@ class PGNGame: Identifiable {
         }
     }
     
+    /**
+     Computes the PGN text for the game.
+     
+     - Returns: The PGN string representing the game and all of its variations.
+     */
     func generatePGNText() -> String {
         
         self.setMetadata(field: "Result", value: self.gameTermination.rawValue)

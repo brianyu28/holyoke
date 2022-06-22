@@ -11,34 +11,90 @@ import Foundation
  Represents a node in a game tree.
  */
 class PGNGameNode: Identifiable, Equatable {
-    // Incremenets to keep track of unique game node IDs
+    /**
+     Private counter to keep track of game node IDs.
+     */
     static private var inc: Int = 0
+    
+    /**
+     Unique identifier for game node.
+     */
     let id: Int
     
+    /**
+     Move number represented by the current node.
+     */
     let moveNumber: Int
     
-    // Player that just moved in the current position
-    // At the start of a new game, this is technically Black, since White gets the first move
+    /**
+     Player that just made a move in the current position.
+     At the start of a new game, this is Black, since White gets the first move.
+     */
     var playerColor: PlayerColor
     
+    /**
+     Array of variations that follow the current node.
+     */
     var variations: [PGNGameNode]
+    
+    /**
+     The game node that preceded this node in the game tree.
+     `nil` if the game node has no parent (the root node).
+     */
     var parent: PGNGameNode?
     
+    /**
+     String representing the SAN notation for the move.
+     */
     var move: String?
+    
+    /**
+     Numeric annotation on the move.
+     Currently unused.
+     */
     var numericAnnotation : String
+    
+    /**
+     Comment enclosed in `{` and `}` following the move.
+     Used for most comments about the move.
+     */
     var braceComment : String
+    
+    /**
+     End-of-line comment text.
+     Currently unused.
+     */
     var restOfLineComment : String
+    
+    /**
+     Annotations (`!`, `?`, etc.) for the current move.
+     */
     var annotations : String
     
+    /**
+     Whether the move made is check.
+     */
     var isCheck: Bool
+    
+    /**
+     Whether the move made is checkmate.
+     */
     var isCheckmate: Bool
     
-    // Which of the variations is "selected"; that is, should be chosen when we go to the next move
-    var selectedVariationIndex: Int?
-    
-    // Chessboard for current node, so that we can return to nodes more easily
+    /**
+     Chessboard for the current node, so that we can return to it more easily.
+     */
     var chessboard: Chessboard?
     
+    /**
+     Which of the node's variations is "selected"; that is, should be chosen when the user progresses to the next move.
+     */
+    // TODO: Move this out of the PGNGameNode class into separate app state?
+    var selectedVariationIndex: Int?
+    
+    /**
+     Initialize a new game node.
+     */
     init(parent: PGNGameNode?) {
         Self.inc += 1
         self.id = Self.inc
@@ -57,45 +113,49 @@ class PGNGameNode: Identifiable, Equatable {
         self.isCheck = false
         self.isCheckmate = false
         
-        self.selectedVariationIndex = nil
-        
         self.chessboard = nil
+        self.selectedVariationIndex = nil
     }
     
+    /**
+     Compare two game nodes for equality.
+     */
     public static func == (lhs: PGNGameNode, rhs: PGNGameNode) -> Bool {
         return lhs.id == rhs.id
         
     }
     
-    // If current player is White, next move is the same move number
+    /**
+     The full move number for the next move. Increments only after a Black move.
+     */
+    // TODO: Handle cases where the first move in the starting position isn't move 1.
     var nextMoveNumber: Int {
         // The first move of the game is always move 1, regardless of the color to move first
         if self.parent == nil {
             return 1
         }
         switch playerColor {
-        case .white:
-            return moveNumber
-        case .black:
-            return moveNumber + 1
-        }
-    }
-    
-    var mainlineLength: Int {
-        if self.variations.count > 0 {
-            return 1 + self.variations[0].mainlineLength
-        } else {
-            return 1
+        case .white: return moveNumber
+        case .black: return moveNumber + 1
         }
     }
     
     /**
      Add an existing node as a child of the node.
+     
+     - Parameters:
+        - variation: The variation to add to the current game node.
      */
     func addVariation(variation: PGNGameNode) {
         self.variations.append(variation)
     }
     
+    /**
+     Set a particular variation as the selected variation for the game node.
+     
+     - Parameters:
+        - variation: The variation to set as the selected variation.
+     */
     func setSelectedVariation(variation: PGNGameNode) {
         self.selectedVariationIndex = nil
         for (i, possibleVariation) in self.variations.enumerated() {
@@ -106,7 +166,13 @@ class PGNGameNode: Identifiable, Equatable {
         }
     }
     
-    // Sets which player is to move in the current position, propogates to subsequent nodes
+    /**
+     Set which player is to move in the current position.
+     This value is propagated to all descendant nodes.
+     
+     - Parameters:
+        - playerToMove: The player to move in the current position.
+     */
     func setPlayerToMove(playerToMove: PlayerColor) {
         let currentPlayerColor = self.playerColor
         
@@ -123,7 +189,9 @@ class PGNGameNode: Identifiable, Equatable {
     }
     
     /**
-     Create and return a new child node.
+     Create and return a new child node as a variation on the current node.
+     
+     - Returns: The newly created game node.
      */
     func addNewVariation() -> PGNGameNode {
         let variation = PGNGameNode(parent: self)
@@ -131,6 +199,13 @@ class PGNGameNode: Identifiable, Equatable {
         return variation
     }
     
+    /**
+     Return the PGN move notation for the current move.
+     
+     - Parameters:
+        - withMoveNumber: Whether the move number be included in the output.
+        - withComments: Whether brace comments should be included in the output.
+     */
     func pgnNotation(withMoveNumber: Bool, withComments: Bool) -> String {
         var pgn = ""
         if withMoveNumber {
@@ -156,6 +231,11 @@ class PGNGameNode: Identifiable, Equatable {
         return pgn
     }
     
+    /**
+     Return the sequence of PGN moves from the root until the current node.
+     
+     - Returns: PGN string.
+     */
     func moveSequenceUntilCurrentNode() -> String {
         if self.moveNumber == 0 {
             return ""

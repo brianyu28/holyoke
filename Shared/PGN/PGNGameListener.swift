@@ -8,20 +8,44 @@
 import Foundation
 import Antlr4
 
+/**
+ Listener to parse a PGN game file into a collection of `PGNGame`s.
+ */
 class PGNGameListener : PGNBaseListener {
     
+    /**
+     Array of games in the PGN file.
+     */
     private var games: [PGNGame]
+    
+    /**
+     The game that is currently being parsed.
+     */
     private var currentGame: PGNGame
+    
+    /**
+     Stack of all sub-variations that may need new moves added.
+     */
     private var variationStack: [PGNGameNode]
     
+    /**
+     Array of valid FEN move annotation symbols, e.g. `!` and `?`.
+     Arranged in order so that the first one that appears as a substring of the move text is the correct symbol.
+     */
     static let possibleAnnotationSymbols = ["!!", "!?", "?!", "??", "!", "?"]
     
+    /**
+     Initialize a new listener.
+     */
     override init() {
         games = []
         currentGame = PGNGame()
         variationStack = []
     }
     
+    /**
+     Parse a PGN string representing one or more games, return the corresponding game array.
+     */
     static func parseGamesFromPGNString(pgn: String) -> [PGNGame] {
         if pgn.isEmpty {
             return [PGNGame()]
@@ -41,12 +65,15 @@ class PGNGameListener : PGNBaseListener {
         }
     }
     
+    /**
+     Return the games parsed.
+     */
     func getGames() -> [PGNGame] {
         return games
     }
     
-    // When leaving a tag pair, add it to the current game's metadata
     override func exitTag_pair(_ ctx: PGNParser.Tag_pairContext) {
+        // Add tag name and value to metadata
         if let tag_name = ctx.tag_name()?.SYMBOL(), let tag_value = ctx.tag_value()?.STRING() {
             let name = tag_name.getText()
             let value = String(tag_value.getText().dropFirst().dropLast()).replacingOccurrences(of: "\\\"", with: "\"")
@@ -96,6 +123,7 @@ class PGNGameListener : PGNBaseListener {
                 variationStack = [firstMoveNode]
             }
         } else if let braceComment = ctx.BRACE_COMMENT() {
+            // Add comment to the move for the current node
             if let node = variationStack.last {
                 node.braceComment = String(braceComment.getText().dropFirst().dropLast()).trimmingCharacters(in: .whitespacesAndNewlines)
             }
@@ -103,6 +131,7 @@ class PGNGameListener : PGNBaseListener {
     }
     
     override func enterRecursive_variation(_ ctx: PGNParser.Recursive_variationContext) {
+        // Add a new variation to the parent, since the variation is an alternative to the latest node
         if let node = variationStack.last {
             if let parent = node.parent {
                 variationStack.append(parent.addNewVariation())
@@ -111,6 +140,7 @@ class PGNGameListener : PGNBaseListener {
     }
     
     override func exitRecursive_variation(_ ctx: PGNParser.Recursive_variationContext) {
+        // Pop off the variation stack
         if let _ = variationStack.last {
             variationStack.removeLast()
         }
@@ -129,8 +159,11 @@ class PGNGameListener : PGNBaseListener {
     }
     
     override func exitPgn_game(_ ctx: PGNParser.Pgn_gameContext) {
+        // Ensure games have the necessary metadata
         currentGame.completeSTRMetadata()
         games.append(currentGame)
+        
+        // Create a new game to be worked on
         currentGame = PGNGame()
         variationStack = []
     }
