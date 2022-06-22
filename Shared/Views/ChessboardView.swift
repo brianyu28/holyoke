@@ -91,7 +91,7 @@ struct ChessboardView: View {
                                         let legalMoves = chessboard.legalMovesForPieceAtSquare(square: newSelectedSquare)
                                         var legalMovesDict: [BoardSquare:Move] = [:]
                                         for move in legalMoves {
-                                            legalMovesDict[move.newSquare] = move
+                                            legalMovesDict[move.endSquare] = move
                                         }
                                         legalMovesForSelectedPiece = legalMovesDict
                                     } else {

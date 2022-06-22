@@ -11,33 +11,84 @@ import Foundation
  Represents a chess move.
  */
 struct Move: Identifiable, Equatable {
+    
+    /**
+     The piece involved in the move.
+     */
     let piece: Piece
-    let currentSquare: BoardSquare
-    let newSquare: BoardSquare
+    
+    /**
+     The starting square of the piece.
+     */
+    let startSquare: BoardSquare
+    
+    /**
+     The ending square of the piece.
+     */
+    let endSquare: BoardSquare
+    
+    /**
+     Whether this move is a capturing move.
+     */
     let isCapture: Bool
     
     // Additional metadata for "special" moves.
+    
+    /**
+     Whether the move is a short castle.
+     */
     let isCastleShort: Bool
+    
+    /**
+     Whether the move is a long castle.
+     */
     let isCastleLong: Bool
+    
+    /**
+     Whether the move is an en passant capture.
+     */
     let isEnPassant: Bool
+    
+    /**
+     If the move is a promotion, the piece type the pawn is promoted to.
+     This value is `nil` if the move is not a promotion.
+     */
     let promotion: PieceType?
     
+    /**
+     Unique identifier for a move.
+     Moves can be uniquely identified by the piece start square, end square, and promotion (if applicable).
+     */
     var id: String {
-        return "\(piece.description)\(currentSquare.notation)\(newSquare.notation)"
+        return "\(startSquare.notation)\(endSquare.notation)\(promotion?.description ?? "")"
     }
     
-    public static func == (lhs: Move, rhs: Move) -> Bool {
-        return (lhs.piece == rhs.piece && lhs.currentSquare == rhs.currentSquare && lhs.newSquare == rhs.newSquare &&
-                lhs.isCastleShort == rhs.isCastleShort && lhs.isCastleLong == rhs.isCastleLong &&
-                lhs.isEnPassant == rhs.isEnPassant && lhs.promotion == rhs.promotion)
-        
-    }
+    /**
+     Compares two moves for equality.
+     Two moves must match in all properties to be considered equal.
+     */
+    public static func == (lhs: Move, rhs: Move) -> Bool { (
+        lhs.piece == rhs.piece &&
+        lhs.startSquare == rhs.startSquare && lhs.endSquare == rhs.endSquare &&
+        lhs.isCastleShort == rhs.isCastleShort && lhs.isCastleLong == rhs.isCastleLong &&
+        lhs.isEnPassant == rhs.isEnPassant &&
+        lhs.promotion == rhs.promotion
+    ) }
     
-    // Initializer for normal moves
-    init(piece: Piece, currentSquare: BoardSquare, newSquare: BoardSquare, isCapture: Bool) {
+    /**
+     Initializes a normal move.
+     A normal move is assumed to not be castling, en passant, or promotion.
+     
+     - Parameters:
+        - piece: The piece to move.
+        - startSquare: Starting square of the piece.
+        - endSquare: Ending square of the piece.
+        - isCapture: Whether the move is capturing a piece.
+     */
+    init(piece: Piece, startSquare: BoardSquare, endSquare: BoardSquare, isCapture: Bool) {
         self.piece = piece
-        self.currentSquare = currentSquare
-        self.newSquare = newSquare
+        self.startSquare = startSquare
+        self.endSquare = endSquare
         self.isCapture = isCapture
         
         self.isCastleShort = false
@@ -46,13 +97,21 @@ struct Move: Identifiable, Equatable {
         self.promotion = nil
     }
     
+    /**
+     Initializes a short castle move.
+     
+     - Parameters:
+        - piece: The piece to move. This must be a king, otherwise the function throws a fatal error.
+     */
     init(withPieceCastlingShort piece: Piece) {
         if piece.type != .king {
             fatalError("Attempt to castle short with a non-king piece.")
         }
+        let castlingRank = Chessboard.castlingRankFor(color: piece.color)
+        
         self.piece = piece
-        self.currentSquare = BoardSquare(rank: piece.color == .white ? 7 : 0, file: 4)
-        self.newSquare = BoardSquare(rank: piece.color == .white ? 7 : 0, file: 6)
+        self.startSquare = BoardSquare(rank: castlingRank, file: Chessboard.kingStartFile)
+        self.endSquare = BoardSquare(rank: castlingRank, file: Chessboard.kingShortCastleEndFile)
         self.isCapture = false
         
         self.isCastleShort = true
@@ -61,13 +120,21 @@ struct Move: Identifiable, Equatable {
         self.promotion = nil
     }
     
+    /**
+     Initializes a long castle move.
+     
+     - Parameters:
+        - piece: The piece to move. This must be a king, otherwise the function throws a fatal error.
+     */
     init(withPieceCastlingLong piece: Piece) {
         if piece.type != .king {
             fatalError("Attempt to castle short with a non-king piece.")
         }
+        let castlingRank = Chessboard.castlingRankFor(color: piece.color)
+        
         self.piece = piece
-        self.currentSquare = BoardSquare(rank: piece.color == .white ? 7 : 0, file: 4)
-        self.newSquare = BoardSquare(rank: piece.color == .white ? 7 : 0, file: 2)
+        self.startSquare = BoardSquare(rank: castlingRank, file: Chessboard.kingStartFile)
+        self.endSquare = BoardSquare(rank: castlingRank, file: Chessboard.kingLongCastleEndFile)
         self.isCapture = false
         
         self.isCastleShort = false
@@ -76,13 +143,22 @@ struct Move: Identifiable, Equatable {
         self.promotion = nil
     }
     
-    init(withEnPassantByPawn piece: Piece, currentSquare: BoardSquare, newSquare: BoardSquare) {
+    /**
+     Initializes an en passant move.
+     
+     - Parameters:
+        - piece: The piece to move. This must be a pawn, otherwise the function throws a fatal error.
+        - startSquare: The starting square of the pawn.
+        - endSquare: The ending square of the pawn. This is the square where the pawn ends up, not where the opposite color captured pawn is.
+     */
+    init(withEnPassantByPawn piece: Piece, startSquare: BoardSquare, endSquare: BoardSquare) {
         if piece.type != .pawn {
             fatalError("Attempt to en passant with a non-pawn piece.")
         }
+
         self.piece = piece
-        self.currentSquare = currentSquare
-        self.newSquare = newSquare
+        self.startSquare = startSquare
+        self.endSquare = endSquare
         self.isCapture = true
         
         self.isCastleShort = false
@@ -91,13 +167,23 @@ struct Move: Identifiable, Equatable {
         self.promotion = nil
     }
     
-    init(withPawnPromoting piece: Piece, toPiece newPiece: PieceType, currentSquare: BoardSquare, newSquare: BoardSquare, isCapture: Bool) {
+    /**
+     Initializes a pawn promotion move.
+     
+     - Parameters:
+        - piece: The piece to promote. This must be a pawn, otherwise the function throws a fatal error.
+        - toPiece: The piece type to promote to.
+        - startSquare: The starting square of the pawn.
+        - endSquare: The ending square of the pawn.
+        - isCapture: Whether the pawn is capturing a piece in order to promote.
+     */
+    init(withPawnPromoting piece: Piece, toPiece newPiece: PieceType, startSquare: BoardSquare, endSquare: BoardSquare, isCapture: Bool) {
         if piece.type != .pawn {
             fatalError("Attempted to promote a non-pawn piece.")
         }
         self.piece = piece
-        self.currentSquare = currentSquare
-        self.newSquare = newSquare
+        self.startSquare = startSquare
+        self.endSquare = endSquare
         self.isCapture = isCapture
         
         self.isCastleShort = false

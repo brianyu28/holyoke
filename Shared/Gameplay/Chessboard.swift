@@ -217,7 +217,7 @@ class Chessboard : CustomStringConvertible {
     
     func getChessboardAfterMove(move: Move, computeNextLegalMoves: Bool = true) -> Chessboard {
         
-        guard let piece = self.pieceAt(rank: move.currentSquare.rank, file: move.currentSquare.file) else {
+        guard let piece = self.pieceAt(rank: move.startSquare.rank, file: move.startSquare.file) else {
             return self
         }
         
@@ -229,16 +229,16 @@ class Chessboard : CustomStringConvertible {
         }
         
         // Make move
-        newPosition[move.currentSquare.rank][move.currentSquare.file] = nil
-        newPosition[move.newSquare.rank][move.newSquare.file] = piece
+        newPosition[move.startSquare.rank][move.startSquare.file] = nil
+        newPosition[move.endSquare.rank][move.endSquare.file] = piece
         
         // Check for en passant
         if move.isEnPassant {
-            newPosition[piece.color == .white ? move.newSquare.rank + 1 : move.newSquare.rank - 1][move.newSquare.file] = nil
+            newPosition[piece.color == .white ? move.endSquare.rank + 1 : move.endSquare.rank - 1][move.endSquare.file] = nil
         }
         
         if let promotionPieceType = move.promotion {
-            newPosition[move.newSquare.rank][move.newSquare.file] = Piece(color: piece.color, type: promotionPieceType)
+            newPosition[move.endSquare.rank][move.endSquare.file] = Piece(color: piece.color, type: promotionPieceType)
         }
         
         // Check for castling
@@ -257,10 +257,10 @@ class Chessboard : CustomStringConvertible {
         }
         
         let enPassantTarget: BoardSquare? = {
-            if move.piece.type == .pawn && move.piece.color == .white && move.currentSquare.rank == 6 && move.newSquare.rank == 4 {
-                return BoardSquare(rank: 5, file: move.currentSquare.file)
-            } else if move.piece.type == .pawn && move.piece.color == .black && move.currentSquare.rank == 1 && move.newSquare.rank == 3 {
-                return BoardSquare(rank: 2, file: move.currentSquare.file)
+            if move.piece.type == .pawn && move.piece.color == .white && move.startSquare.rank == 6 && move.endSquare.rank == 4 {
+                return BoardSquare(rank: 5, file: move.startSquare.file)
+            } else if move.piece.type == .pawn && move.piece.color == .black && move.startSquare.rank == 1 && move.endSquare.rank == 3 {
+                return BoardSquare(rank: 2, file: move.startSquare.file)
             } else {
                 return nil
             }
@@ -277,22 +277,22 @@ class Chessboard : CustomStringConvertible {
         board.whiteRightToCastleKingside = (
             self.whiteRightToCastleKingside &&
             !(move.piece.color == .white && move.piece.type == .king) &&
-            !(move.piece.color == .white && move.piece.type == .rook && move.currentSquare.rank == 7 && move.currentSquare.file == 7)
+            !(move.piece.color == .white && move.piece.type == .rook && move.startSquare.rank == 7 && move.startSquare.file == 7)
         )
         board.whiteRightToCastleQueenside = (
             self.whiteRightToCastleQueenside &&
             !(move.piece.color == .white && move.piece.type == .king) &&
-            !(move.piece.color == .white && move.piece.type == .rook && move.currentSquare.rank == 7 && move.currentSquare.file == 0)
+            !(move.piece.color == .white && move.piece.type == .rook && move.startSquare.rank == 7 && move.startSquare.file == 0)
         )
         board.blackRightToCastleKingside = (
             self.blackRightToCastleKingside &&
             !(move.piece.color == .black && move.piece.type == .king) &&
-            !(move.piece.color == .black && move.piece.type == .rook && move.currentSquare.rank == 0 && move.currentSquare.file == 7)
+            !(move.piece.color == .black && move.piece.type == .rook && move.startSquare.rank == 0 && move.startSquare.file == 7)
         )
         board.blackRightToCastleQueenside = (
             self.blackRightToCastleQueenside &&
             !(move.piece.color == .black && move.piece.type == .king) &&
-            !(move.piece.color == .black && move.piece.type == .rook && move.currentSquare.rank == 0 && move.currentSquare.file == 0)
+            !(move.piece.color == .black && move.piece.type == .rook && move.startSquare.rank == 0 && move.startSquare.file == 0)
         )
         
         if (computeNextLegalMoves) {
@@ -355,9 +355,9 @@ class Chessboard : CustomStringConvertible {
             if move.piece.type == .pawn {
                 var moveName = ""
                 if move.isCapture {
-                    moveName += "\(move.currentSquare.fileNotation)x"
+                    moveName += "\(move.startSquare.fileNotation)x"
                 }
-                moveName += move.newSquare.notation
+                moveName += move.endSquare.notation
                 if let promotionType = move.promotion {
                     moveName += "=\(promotionType.description)"
                 }
@@ -369,24 +369,24 @@ class Chessboard : CustomStringConvertible {
             } else {
                 let ambiguousMoves = moveList.filter { otherMove in
                     move.piece.type == otherMove.piece.type &&
-                    move.newSquare.rank == otherMove.newSquare.rank &&
-                    move.newSquare.file == otherMove.newSquare.file
+                    move.endSquare.rank == otherMove.endSquare.rank &&
+                    move.endSquare.file == otherMove.endSquare.file
                 }
                 
                 var moveName = ""
                 if ambiguousMoves.count == 1 {
                     moveName += move.piece.type.description
-                } else if (ambiguousMoves.filter { otherMove in move.currentSquare.file == otherMove.currentSquare.file }).count == 1 {
-                    moveName += move.piece.type.description + move.currentSquare.fileNotation
-                } else if (ambiguousMoves.filter { otherMove in move.currentSquare.rank == otherMove.currentSquare.rank }).count == 1 {
-                    moveName += move.piece.type.description + move.currentSquare.rankNotation
+                } else if (ambiguousMoves.filter { otherMove in move.startSquare.file == otherMove.startSquare.file }).count == 1 {
+                    moveName += move.piece.type.description + move.startSquare.fileNotation
+                } else if (ambiguousMoves.filter { otherMove in move.startSquare.rank == otherMove.startSquare.rank }).count == 1 {
+                    moveName += move.piece.type.description + move.startSquare.rankNotation
                 } else {
-                    moveName += move.piece.type.description + move.currentSquare.notation
+                    moveName += move.piece.type.description + move.startSquare.notation
                 }
                 if move.isCapture {
                     moveName += "x"
                 }
-                moveName += move.newSquare.notation
+                moveName += move.endSquare.notation
                 self.legalMoves[moveName + suffix] = move
             }
         }
@@ -520,18 +520,18 @@ class Chessboard : CustomStringConvertible {
                     if nextRank == (playerToMove == .white ? 0 : 7) {
                         // Promotion
                         for pieceType in [PieceType.queen, PieceType.rook, PieceType.knight, PieceType.bishop] {
-                            moves.append(Move(withPawnPromoting: piece, toPiece: pieceType, currentSquare: currentSquare, newSquare: nextSquare, isCapture: false))
+                            moves.append(Move(withPawnPromoting: piece, toPiece: pieceType, startSquare: currentSquare, endSquare: nextSquare, isCapture: false))
                         }
                     } else {
                         // Non-promotion
-                        moves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: nextSquare, isCapture: false))
+                        moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: nextSquare, isCapture: false))
                         
                         // Allow pawns to move two squares forward on the first move
                         if currentSquare.rank == (playerToMove == .white ? 6 : 1) {
                             let twoSquaresAhead = BoardSquare(rank: playerToMove == .white ? currentSquare.rank - 2 : currentSquare.rank + 2, file: currentSquare.file)
                             let twoSquareInfo = self.isValidMovementSquare(square: twoSquaresAhead, player: playerToMove)
                             if twoSquareInfo.isValid && !twoSquareInfo.isCapture {
-                                moves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: twoSquaresAhead, isCapture: false))
+                                moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: twoSquaresAhead, isCapture: false))
                             }
                         }
                     }
@@ -548,11 +548,11 @@ class Chessboard : CustomStringConvertible {
                         if nextRank == (playerToMove == .white ? 0 : 7) {
                             // Promotion
                             for pieceType in [PieceType.queen, PieceType.rook, PieceType.knight, PieceType.bishop] {
-                                moves.append(Move(withPawnPromoting: piece, toPiece: pieceType, currentSquare: currentSquare, newSquare: capturingSquare, isCapture: true))
+                                moves.append(Move(withPawnPromoting: piece, toPiece: pieceType, startSquare: currentSquare, endSquare: capturingSquare, isCapture: true))
                             }
                         } else {
                             // Non-Promotion
-                            moves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: capturingSquare, isCapture: true))
+                            moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: capturingSquare, isCapture: true))
                         }
                     }
                 }
@@ -560,7 +560,7 @@ class Chessboard : CustomStringConvertible {
                 // Check if En Passant is allowed
                 if let enPassantTarget = enPassantTarget {
                     if currentSquare.rank == (playerToMove == .white ? 3 : 4) && enPassantTarget.rank == (playerToMove == .white ? 2 : 5) && abs(enPassantTarget.file - currentSquare.file) == 1 {
-                        moves.append(Move(withEnPassantByPawn: piece, currentSquare: currentSquare, newSquare: BoardSquare(rank: playerToMove == .white ? 2 : 5, file: enPassantTarget.file)))
+                        moves.append(Move(withEnPassantByPawn: piece, startSquare: currentSquare, endSquare: BoardSquare(rank: playerToMove == .white ? 2 : 5, file: enPassantTarget.file)))
                     }
                 }
 
@@ -574,7 +574,7 @@ class Chessboard : CustomStringConvertible {
                     for possibleSquare in possibleSquares {
                         let squareInfo = self.isValidMovementSquare(square: possibleSquare, player: playerToMove)
                         if squareInfo.isValid {
-                            moves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: possibleSquare, isCapture: squareInfo.isCapture))
+                            moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: possibleSquare, isCapture: squareInfo.isCapture))
                         }
                     }
                 }
@@ -586,7 +586,7 @@ class Chessboard : CustomStringConvertible {
                     while (true) {
                         let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
                         if squareInfo.isValid {
-                            moves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: candidateSquare, isCapture: squareInfo.isCapture))
+                            moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
                             if squareInfo.isCapture {
                                 break
                             }
@@ -604,7 +604,7 @@ class Chessboard : CustomStringConvertible {
                     while (true) {
                         let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
                         if squareInfo.isValid {
-                            moves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: candidateSquare, isCapture: squareInfo.isCapture))
+                            moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
                             if squareInfo.isCapture {
                                 break
                             }
@@ -622,7 +622,7 @@ class Chessboard : CustomStringConvertible {
                     while (true) {
                         let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
                         if squareInfo.isValid {
-                            moves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: candidateSquare, isCapture: squareInfo.isCapture))
+                            moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
                             if squareInfo.isCapture {
                                 break
                             }
@@ -639,7 +639,7 @@ class Chessboard : CustomStringConvertible {
                     let candidateSquare = BoardSquare(rank: currentSquare.rank + rankDirection, file: currentSquare.file + fileDirection)
                     let squareInfo = self.isValidMovementSquare(square: candidateSquare, player: playerToMove)
                     if squareInfo.isValid {
-                        moves.append(Move(piece: piece, currentSquare: currentSquare, newSquare: candidateSquare, isCapture: squareInfo.isCapture))
+                        moves.append(Move(piece: piece, startSquare: currentSquare, endSquare: candidateSquare, isCapture: squareInfo.isCapture))
                     }
                 }
                 
@@ -656,7 +656,7 @@ class Chessboard : CustomStringConvertible {
                         let betweenSquares = [BoardSquare(rank: 7, file: 5), BoardSquare(rank: 7, file: 6)]
                         let intermediateSquare = BoardSquare(rank: 7, file: 5)
                         if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
-                            if !self.getChessboardAfterMove(move: Move(piece: piece, currentSquare: currentSquare, newSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
+                            if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
                                 moves.append(Move(withPieceCastlingShort: piece))
                             }
                         }
@@ -665,7 +665,7 @@ class Chessboard : CustomStringConvertible {
                         let betweenSquares = [BoardSquare(rank: 7, file: 1), BoardSquare(rank: 7, file: 2), BoardSquare(rank: 7, file: 3)]
                         let intermediateSquare = BoardSquare(rank: 7, file: 3)
                         if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
-                            if !self.getChessboardAfterMove(move: Move(piece: piece, currentSquare: currentSquare, newSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
+                            if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
                                 moves.append(Move(withPieceCastlingLong: piece))
                             }
                         }
@@ -674,7 +674,7 @@ class Chessboard : CustomStringConvertible {
                         let betweenSquares = [BoardSquare(rank: 0, file: 5), BoardSquare(rank: 0, file: 6)]
                         let intermediateSquare = BoardSquare(rank: 0, file: 5)
                         if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
-                            if !self.getChessboardAfterMove(move: Move(piece: piece, currentSquare: currentSquare, newSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
+                            if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
                                 moves.append(Move(withPieceCastlingShort: piece))
                             }
                         }
@@ -683,7 +683,7 @@ class Chessboard : CustomStringConvertible {
                         let betweenSquares = [BoardSquare(rank: 0, file: 1), BoardSquare(rank: 0, file: 2), BoardSquare(rank: 0, file: 3)]
                         let intermediateSquare = BoardSquare(rank: 0, file: 3)
                         if betweenSquares.allSatisfy( { square in self.pieceAt(rank: square.rank, file: square.file) == nil } ) {
-                            if !self.getChessboardAfterMove(move: Move(piece: piece, currentSquare: currentSquare, newSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
+                            if !self.getChessboardAfterMove(move: Move(piece: piece, startSquare: currentSquare, endSquare: intermediateSquare, isCapture: false), computeNextLegalMoves: false).isPlayerInCheck(player: playerToMove) {
                                 moves.append(Move(withPieceCastlingLong: piece))
                             }
                         }
@@ -700,7 +700,7 @@ class Chessboard : CustomStringConvertible {
     
     func legalMovesForPieceAtSquare(square: BoardSquare) -> [Move] {
         return Array(self.legalMoves.values.filter { move in
-            move.currentSquare == square
+            move.startSquare == square
         })
     }
     
@@ -725,7 +725,7 @@ class Chessboard : CustomStringConvertible {
             let promotion: PieceType? = moveText.count == 5 ? PieceType.fromDescription(description: String(moveText[moveText.index(moveText.startIndex, offsetBy: 4)])) : nil
             
             for (notation, move) in currentBoard.legalMoves {
-                if move.currentSquare == startSquare && move.newSquare == endSquare && move.promotion == promotion {
+                if move.startSquare == startSquare && move.endSquare == endSquare && move.promotion == promotion {
                     
                     if move.piece.color == .white {
                         line += String(currentBoard.fullmoveNumber) + ". " + notation + " "

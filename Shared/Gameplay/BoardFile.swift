@@ -23,6 +23,11 @@ extension Chessboard {
     static let fFile: BoardFile = 5
     static let gFile: BoardFile = 6
     static let hFile: BoardFile = 7
+    
+    // Constants representing files with special meanings
+    static let kingStartFile: BoardFile = Chessboard.eFile
+    static let kingShortCastleEndFile: BoardFile = Chessboard.gFile
+    static let kingLongCastleEndFile: BoardFile = Chessboard.cFile
 
     /**
      Computes whether the file is a valid file on the chessboard.

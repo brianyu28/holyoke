@@ -23,6 +23,10 @@ extension Chessboard {
     static let sixthRank: BoardRank = 2
     static let seventhRank: BoardRank = 1
     static let eighthRank: BoardRank = 0
+    
+    // Constants representing ranks with special meanings
+    static let whiteCastlingRank: BoardRank = Chessboard.firstRank
+    static let blackCastlingRank: BoardRank = Chessboard.eighthRank
 
     /**
      Computes whether the rank is a valid rank on the chessboard.
@@ -60,4 +64,16 @@ extension Chessboard {
      - Returns: The string ("a" through "h") representing the file, or `nil` if the file is invalid.
      */
     static func sanFromRank(rank: BoardRank) -> String { String(8 - rank) }
+    
+    /**
+     Returns the rank that a player castles on.
+     
+     - Parameters:
+        - color: The color of the player that is castling.
+     
+     - Returns: The rank of the player's king and rook when castling.
+     */
+    static func castlingRankFor(color: PlayerColor) -> BoardRank {
+        color == .white ? Chessboard.whiteCastlingRank : Chessboard.blackCastlingRank
+    }
 }
