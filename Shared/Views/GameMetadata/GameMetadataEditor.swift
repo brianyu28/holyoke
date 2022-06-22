@@ -1,18 +1,14 @@
 //
-//  GameMetadataView.swift
+//  GameMetadataEditor.swift
 //  Holyoke
 //
-//  Created by Brian Yu on 6/19/22.
+//  Created by Brian Yu on 6/21/22.
 //
 
 import SwiftUI
 
-struct GameMetadataView: View {
-    @Environment(\.undoManager) var undoManager
-    
+struct GameMetadataEditor: View {
     @ObservedObject var document: HolyokeDocument
-    
-    @State private var isPresentingDeleteConfirmation = false
     
     var body: some View {
         
@@ -66,13 +62,8 @@ struct GameMetadataView: View {
             document.forceManualRefresh()
         })
         
-        return VStack(alignment: .leading) {
-            
-            Picker("Game", selection: $document.currentGameIndex) {
-                ForEach(document.games.indices, id: \.self) { index in
-                    Text(document.games[index].gameTitleDescription).tag(index)
-                }
-            }
+        return VStack {
+            Text("**Game Details**")
             
             HStack {
                 Text("White")
@@ -115,34 +106,12 @@ struct GameMetadataView: View {
                     Text(result.rawValue)
                 }
             }
-            
-            HStack {
-
-                Button("Delete") {
-                    isPresentingDeleteConfirmation = true
-                }
-                .keyboardShortcut(.delete, modifiers: .command)
-                .help("Delete game")
-                .confirmationDialog("Delete game?", isPresented: $isPresentingDeleteConfirmation) {
-                    Button("Confirm Delete", role: .destructive) {
-                        document.deleteCurrentGame()
-                    }
-                }
-                
-                Spacer()
-                
-                Button("New Game") {
-                    document.createNewGame(undoManager: undoManager)
-                }
-            }
-            
         }
-        .padding()
     }
 }
 
-struct GameMetadataView_Previews: PreviewProvider {
+struct GameMetadataEditor_Previews: PreviewProvider {
     static var previews: some View {
-        GameMetadataView(document: HolyokeDocument())
+        GameMetadataEditor(document: HolyokeDocument())
     }
 }

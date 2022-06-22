@@ -248,6 +248,9 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     func deleteCurrentNode() {
         // Move needs a parent
         guard let parent = currentNode.parent else {
+            self.currentNode.selectedVariationIndex = nil
+            self.currentNode.variations = []
+            self.forceManualRefresh()
             return
         }
         
