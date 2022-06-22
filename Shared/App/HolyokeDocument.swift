@@ -42,13 +42,13 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     init() {
         let games = PGNGameListener.parseGamesFromPGNString(pgn: "")
         let currentGameIndex = 0
-        let chessboard = Chessboard.initInStartingPosition()
         
         self.games = games
         self.currentGameIndex = currentGameIndex
         self.currentNode = games[currentGameIndex].root
         self.gameCurrentNodes = [:]
-        self.currentNode.chessboard = chessboard
+        self.currentNode.chessboard = games[currentGameIndex].startingPosition
+        self.currentNode.setPlayerToMove(playerToMove: self.currentNode.chessboard!.playerToMove)
     }
 
     static var readableContentTypes: [UTType] { [.pgnType] }
@@ -64,13 +64,13 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         
         let games = PGNGameListener.parseGamesFromPGNString(pgn: string)
         let currentGameIndex = 0
-        let chessboard = Chessboard.initInStartingPosition()
         
         self.games = games
         self.currentGameIndex = currentGameIndex
         self.currentNode = games[currentGameIndex].root
         self.gameCurrentNodes = [:]
-        self.currentNode.chessboard = chessboard
+        self.currentNode.chessboard = games[currentGameIndex].startingPosition
+        self.currentNode.setPlayerToMove(playerToMove: self.currentNode.chessboard!.playerToMove)
     }
     
     func snapshot(contentType: UTType) throws -> [PGNGame] {
@@ -159,7 +159,7 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
             cursor = cursor!.parent
         }
         
-        var board = Chessboard.initInStartingPosition()
+        var board = self.currentGame.startingPosition
         for node in nodes.reversed() {
             if node.moveNumber == 0 {
                 continue
@@ -294,6 +294,7 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         let game = PGNGame()
         let chessboard = Chessboard.initInStartingPosition()
         game.root.chessboard = chessboard
+        game.root.setPlayerToMove(playerToMove: chessboard.playerToMove)
         self.games.append(game)
         self.currentGameIndex = self.games.count - 1
         self.currentNode = game.root

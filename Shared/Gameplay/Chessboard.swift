@@ -32,6 +32,9 @@ class Chessboard : CustomStringConvertible {
     // Dictionary mapping move name in Algebraic Notation to move
     var legalMoves: [String: Move]
     
+    // Starting position
+    static let startingPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    
     // Rank and file directions
     static private let diagionalDirections = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
     static private let horizontalDirections = [(1, 0), (-1, 0), (0, 1), (0, -1)]
@@ -54,55 +57,83 @@ class Chessboard : CustomStringConvertible {
         }
     }
     
+    // Initialize in starting position from FEN, returns nil if invalid FEN
+    static func initFromFen(fen: String) -> Chessboard? {
+        let components = fen.components(separatedBy: " ")
+        if components.count != 6 {
+            return nil
+        }
+        
+        var position: ChessPosition = [
+            [nil, nil, nil, nil, nil, nil, nil, nil],
+            [nil, nil, nil, nil, nil, nil, nil, nil],
+            [nil, nil, nil, nil, nil, nil, nil, nil],
+            [nil, nil, nil, nil, nil, nil, nil, nil],
+            [nil, nil, nil, nil, nil, nil, nil, nil],
+            [nil, nil, nil, nil, nil, nil, nil, nil],
+            [nil, nil, nil, nil, nil, nil, nil, nil],
+            [nil, nil, nil, nil, nil, nil, nil, nil],
+        ]
+        
+        let ranks = components[0].components(separatedBy: "/")
+        if ranks.count != 8 {
+            return nil
+        }
+        for (i, rank) in ranks.enumerated() {
+            var file = 0
+            for char in rank {
+                if file > 7 {
+                    return nil
+                }
+                if let piece = Piece.fromDescription(description: String(char)) {
+                    position[i][file] = piece
+                    file += 1
+                } else if let spaces = Int(String(char)) {
+                    file += spaces
+                } else {
+                    return nil
+                }
+            }
+            if file != 8 {
+                return nil
+            }
+        }
+        
+        let activeColor: PlayerColor? = components[1] == "w" ? .white : components[1] == "b" ? .black : nil
+        guard let activeColor = activeColor else {
+            return nil
+        }
+        
+        let castling = components[2]
+        let whiteRightToCastleKingside = castling.contains("K")
+        let whiteRightToCastleQueenside = castling.contains("Q")
+        let blackRightToCastleKingside = castling.contains("k")
+        let blackRightToCastleQueenside = castling.contains("q")
+        
+        let enPassantTarget: BoardSquare? = BoardSquare.initFromSan(san: components[3])
+        
+        let halfmoveClock: Int? = Int(components[4])
+        guard let halfmoveClock = halfmoveClock else {
+            return nil
+        }
+        
+        let fullmoveNumber: Int? = Int(components[5])
+        guard let fullmoveNumber = fullmoveNumber else {
+            return nil
+        }
+        
+        let board = Chessboard(position: position, playerToMove: activeColor, enPassantTarget: enPassantTarget, fullmoveNumber: fullmoveNumber, halfmoveClock: halfmoveClock)
+        board.whiteRightToCastleKingside = whiteRightToCastleKingside
+        board.whiteRightToCastleQueenside = whiteRightToCastleQueenside
+        board.blackRightToCastleKingside = blackRightToCastleKingside
+        board.blackRightToCastleQueenside = blackRightToCastleQueenside
+        board.computeAndSaveLegalMoves()
+        return board
+    }
+    
     // Initialize in starting position
     static func initInStartingPosition() -> Chessboard {
-        let startingPosition = [
-            [
-                Piece(color: .black, type: .rook),
-                Piece(color: .black, type: .knight),
-                Piece(color: .black, type: .bishop),
-                Piece(color: .black, type: .queen),
-                Piece(color: .black, type: .king),
-                Piece(color: .black, type: .bishop),
-                Piece(color: .black, type: .knight),
-                Piece(color: .black, type: .rook),
-            ],
-            [
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-                Piece(color: .black, type: .pawn),
-            ],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [nil, nil, nil, nil, nil, nil, nil, nil],
-            [
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-                Piece(color: .white, type: .pawn),
-            ],
-            [
-                Piece(color: .white, type: .rook),
-                Piece(color: .white, type: .knight),
-                Piece(color: .white, type: .bishop),
-                Piece(color: .white, type: .queen),
-                Piece(color: .white, type: .king),
-                Piece(color: .white, type: .bishop),
-                Piece(color: .white, type: .knight),
-                Piece(color: .white, type: .rook),
-            ]
-        ]
-        return Chessboard(position: startingPosition, playerToMove: .white, enPassantTarget: nil, fullmoveNumber: 1, halfmoveClock: 0)
+        return self.initFromFen(fen: Self.startingPositionFEN)!
     }
     
     var fen: String {

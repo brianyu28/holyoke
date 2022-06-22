@@ -61,7 +61,7 @@ enum PieceType {
             return .rook
         } else if description == "B" {
             return .bishop
-        } else if description == "K" {
+        } else if description == "N" {
             return .knight
         } else if description == "P" {
             return .pawn
@@ -94,6 +94,13 @@ struct Piece : CustomStringConvertible, Equatable {
             }
         }()
         return color == .white ? symbol : symbol.lowercased()
+    }
+    
+    static func fromDescription(description: String) -> Piece? {
+        guard let pieceType: PieceType = PieceType.fromDescription(description: description.uppercased()) else {
+            return nil
+        }
+        return Piece(color: description.uppercased() == description ? .white : .black, type: pieceType)
     }
     
     public static func == (lhs: Piece, rhs: Piece) -> Bool {
@@ -145,7 +152,28 @@ struct BoardSquare: CustomStringConvertible, Equatable, Hashable {
         self.file = file
     }
     
-    
+    // Init from algebraic notation
+    static func initFromSan(san: String) -> BoardSquare? {
+        if san.count != 2 {
+            return nil
+        }
+        let fileString: String = String(san[san.index(san.startIndex, offsetBy: 0)])
+        let rank: Int? = Int(String(san[san.index(san.startIndex, offsetBy: 1)]))
+        guard let rank = rank else {
+            return nil
+        }
+        if rank < 0 || rank > 7 {
+            return nil
+        }
+        let file: Int? = Self.fileReverseMapping[fileString] ?? nil
+        guard let file = file else {
+            return nil
+        }
+        if file < 0 || file > 7 {
+            return nil
+        }
+        return BoardSquare(rank: rank, file: file)
+    }
     
     public static func == (lhs: BoardSquare, rhs: BoardSquare) -> Bool {
         return lhs.rank == rhs.rank && lhs.file == rhs.file

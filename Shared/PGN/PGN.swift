@@ -63,6 +63,19 @@ class PGNGame: Identifiable {
         return "\(whitePlayerName) – \(blackPlayerName)\(dateString)"
     }
     
+    var startingPosition: Chessboard {
+        if self.getMetadata(query: "SetUp") != "1" {
+            return Chessboard.initInStartingPosition()
+        }
+        guard let fen = self.getMetadata(query: "FEN") else {
+            return Chessboard.initInStartingPosition()
+        }
+        guard let board = Chessboard.initFromFen(fen: fen) else {
+            return Chessboard.initInStartingPosition()
+        }
+        return board
+    }
+    
     func getMetadata(query: String) -> String? {
         for (field: field, value: value) in metadata {
             if field == query {
@@ -70,6 +83,10 @@ class PGNGame: Identifiable {
             }
         }
         return nil
+    }
+    
+    func removeMetadata(field: String) {
+        self.metadata.removeAll(where: { (f: String, _: String) in f == field })
     }
     
     func setMetadata(field: String, value: String) {
@@ -82,6 +99,16 @@ class PGNGame: Identifiable {
         
         // Field not found, add it
         metadata.append((field: field, value: value))
+    }
+    
+    func setStartingPosition(fen: String) {
+        if fen == Chessboard.startingPositionFEN {
+            self.removeMetadata(field: "SetUp")
+            self.removeMetadata(field: "FEN")
+        } else {
+            self.setMetadata(field: "SetUp", value: "1")
+            self.setMetadata(field: "FEN", value: fen)
+        }
     }
     
     // Ensure that the required STR (Steven Tag Roster) tags are present
@@ -100,7 +127,6 @@ class PGNGame: Identifiable {
                 self.metadata.append((field: field, value: value))
             }
         }
-        
     }
     
     func generateNodeLayout() -> (layout: [[PGNGameNode?]], locations: [Int: Int]) {
@@ -115,9 +141,9 @@ class PGNGame: Identifiable {
         
         // Add node to layout with a minimum row, return its actual row
         func addNode(node: PGNGameNode, startingAtRowIndex startRow: Int) -> Int {
-            let col: Int = node.layoutColumn
+            let col: Int = node.moveNumber * 2 - (self.root.playerColor == node.playerColor ? 0 : 1)
             var row: Int = startRow
-            
+                
             while (true) {
                 // Ensure that locations has enough rows
                 while layout.count <= row {
@@ -245,7 +271,7 @@ class PGNGame: Identifiable {
             return pgnString
         }
         
-        pgnString += generateVariationPGNs(node: self.root, includingMoveNumber: false) + self.gameTermination.rawValue + "\n"
+        pgnString += generateVariationPGNs(node: self.root, includingMoveNumber: true) + self.gameTermination.rawValue + "\n"
         return pgnString
     }
 }
@@ -259,7 +285,10 @@ class PGNGameNode: Identifiable, Equatable {
     let id: Int
     
     let moveNumber: Int
-    let playerColor: PlayerColor
+    
+    // Player that just moved in the current position
+    // At the start of a new game, this is technically Black, since White gets the first move
+    var playerColor: PlayerColor
     
     var variations: [PGNGameNode]
     var parent: PGNGameNode?
@@ -309,6 +338,10 @@ class PGNGameNode: Identifiable, Equatable {
     
     // If current player is White, next move is the same move number
     var nextMoveNumber: Int {
+        // The first move of the game is always move 1, regardless of the color to move first
+        if self.parent == nil {
+            return 1
+        }
         switch playerColor {
         case .white:
             return moveNumber
@@ -322,17 +355,6 @@ class PGNGameNode: Identifiable, Equatable {
             return 1 + self.variations[0].mainlineLength
         } else {
             return 1
-        }
-    }
-    
-    // In a layout of all nodes, what column should this node be in
-    // This is determined by the node's move number and color
-    var layoutColumn: Int {
-        switch playerColor {
-        case .white:
-            return moveNumber * 2 - 1
-        case .black:
-            return moveNumber * 2
         }
     }
     
@@ -350,6 +372,22 @@ class PGNGameNode: Identifiable, Equatable {
                 self.selectedVariationIndex = i
                 break
             }
+        }
+    }
+    
+    // Sets which player is to move in the current position, propogates to subsequent nodes
+    func setPlayerToMove(playerToMove: PlayerColor) {
+        let currentPlayerColor = self.playerColor
+        
+        // playerColor should be the opposite of playerToMove,
+        // since playerColor is who just moved in this node, and playerToMove is whose turn it is next
+        // If they're the same, then we need to flip them
+        if currentPlayerColor == playerToMove {
+            self.playerColor = playerToMove.nextColor
+            for variation in self.variations {
+                variation.setPlayerToMove(playerToMove: playerToMove.nextColor)
+            }
+            
         }
     }
     
@@ -418,8 +456,7 @@ class PGNGameListener : PGNBaseListener {
     override init() {
         games = []
         currentGame = PGNGame()
-        let firstMoveNode = currentGame.root.addNewVariation()
-        variationStack = [firstMoveNode]
+        variationStack = []
     }
     
     static func parseGamesFromPGNString(pgn: String) -> [PGNGame] {
@@ -488,6 +525,12 @@ class PGNGameListener : PGNBaseListener {
                     node.move = moveText
                     node.annotations = annotation
                 }
+            } else {
+                // This is the first move of the game
+                let firstMoveNode = currentGame.root.addNewVariation()
+                firstMoveNode.move = moveText
+                firstMoveNode.annotations = annotation
+                variationStack = [firstMoveNode]
             }
         } else if let braceComment = ctx.BRACE_COMMENT() {
             if let node = variationStack.last {
@@ -526,7 +569,6 @@ class PGNGameListener : PGNBaseListener {
         currentGame.completeSTRMetadata()
         games.append(currentGame)
         currentGame = PGNGame()
-        let firstMoveNode = currentGame.root.addNewVariation()
-        variationStack = [firstMoveNode]
+        variationStack = []
     }
 }
