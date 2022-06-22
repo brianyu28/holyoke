@@ -10,7 +10,6 @@ import Antlr4
 
 struct ContentView: View {
     @ObservedObject var document: HolyokeDocument
-    @Environment(\.undoManager) var undoManager
     
     var body: some View {
         TestingView(document: document)

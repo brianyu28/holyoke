@@ -8,12 +8,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-extension UTType {
-    static var pgnType: UTType {
-        UTType(filenameExtension: "pgn", conformingTo: .text)!
-    }
-}
-
 final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
     
     @Published var games: [PGNGame]
