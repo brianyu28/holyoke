@@ -281,8 +281,27 @@
 			children = (
 				D3CFE31C28596C6C00E25606 /* ChessboardView.swift */,
 				D39E02792863E11D001A0A22 /* ChessboardSquareView.swift */,
+				D379ED45286024D80078B22C /* PlayerNamesView.swift */,
+				D3350F75285CD3A60025EE11 /* GameControlsView.swift */,
 			);
 			path = Chessboard;
+			sourceTree = "<group>";
+		};
+		D39E027C2863E623001A0A22 /* Details */ = {
+			isa = PBXGroup;
+			children = (
+				D3350F78285D47D50025EE11 /* GameTreeView.swift */,
+				D3350F7B285D63D60025EE11 /* MoveDetailView.swift */,
+			);
+			path = Details;
+			sourceTree = "<group>";
+		};
+		D39E027D2863E643001A0A22 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				D336AD81286143DB00DA0D56 /* EngineView.swift */,
+			);
+			path = Engine;
 			sourceTree = "<group>";
 		};
 		D3B468B6285174A500A97CC1 = {
@@ -359,15 +378,12 @@
 		D3CFE31B28596C6300E25606 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				D3CFE321285972AB00E25606 /* TestingView.swift */,
 				D39E02742863E0D2001A0A22 /* Styles */,
 				D39E02782863E10C001A0A22 /* Chessboard */,
+				D39E027C2863E623001A0A22 /* Details */,
+				D39E027D2863E643001A0A22 /* Engine */,
 				D3579ABB2862A9F0000A6A9F /* GameMetadata */,
-				D3CFE321285972AB00E25606 /* TestingView.swift */,
-				D3350F75285CD3A60025EE11 /* GameControlsView.swift */,
-				D3350F78285D47D50025EE11 /* GameTreeView.swift */,
-				D3350F7B285D63D60025EE11 /* MoveDetailView.swift */,
-				D379ED45286024D80078B22C /* PlayerNamesView.swift */,
-				D336AD81286143DB00DA0D56 /* EngineView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
