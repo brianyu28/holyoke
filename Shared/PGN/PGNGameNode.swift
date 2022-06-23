@@ -87,12 +87,6 @@ class PGNGameNode: Identifiable, Equatable {
     var chessboard: Chessboard?
     
     /**
-     Which of the node's variations is "selected"; that is, should be chosen when the user progresses to the next move.
-     */
-    // TODO: Move this out of the PGNGameNode class into separate app state?
-    var selectedVariationIndex: Int?
-    
-    /**
      Initialize a new game node.
      */
     init(parent: PGNGameNode?) {
@@ -114,7 +108,6 @@ class PGNGameNode: Identifiable, Equatable {
         self.isCheckmate = false
         
         self.chessboard = nil
-        self.selectedVariationIndex = nil
     }
     
     /**
@@ -127,12 +120,7 @@ class PGNGameNode: Identifiable, Equatable {
     /**
      The full move number for the next move. Increments only after a Black move.
      */
-    // TODO: Handle cases where the first move in the starting position isn't move 1.
     var nextMoveNumber: Int {
-        // The first move of the game is always move 1, regardless of the color to move first
-        if self.parent == nil {
-            return 1
-        }
         switch playerColor {
         case .white: return moveNumber
         case .black: return moveNumber + 1
@@ -147,22 +135,6 @@ class PGNGameNode: Identifiable, Equatable {
      */
     func addVariation(variation: PGNGameNode) {
         self.variations.append(variation)
-    }
-    
-    /**
-     Set a particular variation as the selected variation for the game node.
-     
-     - Parameters:
-        - variation: The variation to set as the selected variation.
-     */
-    func setSelectedVariation(variation: PGNGameNode) {
-        self.selectedVariationIndex = nil
-        for (i, possibleVariation) in self.variations.enumerated() {
-            if possibleVariation.move == variation.move {
-                self.selectedVariationIndex = i
-                break
-            }
-        }
     }
     
     /**
@@ -214,7 +186,7 @@ class PGNGameNode: Identifiable, Equatable {
      - Returns: PGN string.
      */
     func moveSequenceUntilCurrentNode() -> String {
-        if self.moveNumber == 0 {
+        if self.parent == nil {
             return ""
         }
         let currentMove = self.pgnNotation(withMoveNumber: self.playerColor == .white, withComments: false)

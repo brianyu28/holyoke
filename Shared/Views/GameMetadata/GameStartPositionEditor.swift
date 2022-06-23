@@ -29,11 +29,15 @@ struct GameStartPositionEditor: View {
                         return
                     }
                     state.currentGame.setStartingPosition(fen: newStartingPosition)
-                    root.chessboard = board
-                    root.setPlayerToMove(playerToMove: board.playerToMove)
+                    root.setChessboardForNode(board: board)
                     newStartingPosition = ""
                     state.forceManualRefresh()
                 }
+            } else {
+                Text("**Current Position**")
+                    .padding(.top)
+                Text(state.currentNode.chessboard!.fen)
+                    .textSelection(.enabled)
             }
         }
     }

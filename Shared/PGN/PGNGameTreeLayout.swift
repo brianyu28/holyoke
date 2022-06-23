@@ -39,11 +39,14 @@ extension PGNGame {
         // Mapping from PGNGameNode ID -> row index in the final game layout
         var locations: [Int: Int] = [:]
         
+        // What column is the root node in? We should shift it to the leftmost column.
+        let rootCol: Int = self.root.moveNumber * 2 - (self.root.playerColor == .white ? 1 : 0)
+        
         var avoid: Set<GameLayoutPoint> = []
         
         // Add node to layout with a minimum row, return its actual row
         func addNode(node: PGNGameNode, startingAtRowIndex startRow: Int) -> Int {
-            let col: Int = node.moveNumber * 2 - (self.root.playerColor == node.playerColor ? 0 : 1)
+            let col: Int = node.moveNumber * 2 - (node.playerColor == .white ? 1 : 0) - rootCol
             var row: Int = startRow
                 
             while (true) {

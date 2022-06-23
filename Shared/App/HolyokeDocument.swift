@@ -57,11 +57,4 @@ final class HolyokeDocument: ReferenceFileDocument, ObservableObject {
         let data = text.data(using: .utf8)!
         return .init(regularFileWithContents: data)
     }
-    
-    /**
-     Force a manual refresh of the observed object.
-     */
-    func forceManualRefresh() {
-        objectWillChange.send()
-    }
 }

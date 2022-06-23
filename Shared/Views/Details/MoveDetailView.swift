@@ -13,7 +13,7 @@ struct MoveDetailView: View {
     var body: some View {
         HStack {
             VStack {
-                if state.currentNode.moveNumber > 0 {
+                if state.currentNode.parent != nil {
                     Text(state.currentNode.pgnNotation(withMoveNumber: true, withComments: false))
                     TextEditor(text: $state.currentNode.braceComment)
                 }
