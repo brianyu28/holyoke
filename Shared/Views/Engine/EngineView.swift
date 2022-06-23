@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct EngineView: View {
-    
-    @ObservedObject var document: HolyokeDocument
+    @EnvironmentObject var state: DocumentState
     @ObservedObject var engine = ChessEngine.sharedInstance
     
     var body: some View {
@@ -20,7 +19,7 @@ struct EngineView: View {
                 }
             } else {
                 Button("Start Engine") {
-                    guard let board = document.currentNode.chessboard else {
+                    guard let board = state.currentNode.chessboard else {
                         return
                     }
                     engine.run(board: board)
@@ -32,14 +31,14 @@ struct EngineView: View {
                     if let line = engine.lines[i] {
                         Text("\(line.cp, specifier: "%.2f") (d = \(line.depth)) \(line.variation)")
                         .onTapGesture {
-                            document.makeMoveOnBoard(move: line.move)
+                            state.makeMoveFromCurrentNode(move: line.move)
                             
                         }
                     }
                 }
             }
         }
-        .onReceive(document.$currentNode) { node in
+        .onReceive(state.$currentNode) { node in
             let isRunning = engine.isRunningEngine
             if node.chessboard?.fen != engine.currentBoard?.fen {
                 engine.stop(clearLines: true)
@@ -56,6 +55,6 @@ struct EngineView: View {
 
 struct EngineView_Previews: PreviewProvider {
     static var previews: some View {
-        EngineView(document: HolyokeDocument())
+        EngineView()
     }
 }

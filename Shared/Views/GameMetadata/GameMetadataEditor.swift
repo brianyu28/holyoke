@@ -8,58 +8,58 @@
 import SwiftUI
 
 struct GameMetadataEditor: View {
-    @ObservedObject var document: HolyokeDocument
+    @EnvironmentObject var state: DocumentState
     
     var body: some View {
         
         let whiteBinding = Binding<String>(get: {
-            document.currentGame.getMetadata(query: "White") ?? "White"
+            state.currentGame.getMetadata(query: "White") ?? "White"
         }, set: {
-            document.currentGame.setMetadata(field: "White", value: $0)
-            document.forceManualRefresh()
+            state.currentGame.setMetadata(field: "White", value: $0)
+            state.forceManualRefresh()
         })
         
         let blackBinding = Binding<String>(get: {
-            document.currentGame.getMetadata(query: "Black") ?? "Black"
+            state.currentGame.getMetadata(query: "Black") ?? "Black"
         }, set: {
-            document.currentGame.setMetadata(field: "Black", value: $0)
-            document.forceManualRefresh()
+            state.currentGame.setMetadata(field: "Black", value: $0)
+            state.forceManualRefresh()
         })
         
         let eventBinding = Binding<String>(get: {
-            document.currentGame.getMetadata(query: "Event") ?? "???"
+            state.currentGame.getMetadata(query: "Event") ?? "???"
         }, set: {
-            document.currentGame.setMetadata(field: "Event", value: $0)
-            document.forceManualRefresh()
+            state.currentGame.setMetadata(field: "Event", value: $0)
+            state.forceManualRefresh()
         })
         
         let siteBinding = Binding<String>(get: {
-            document.currentGame.getMetadata(query: "Site") ?? "???"
+            state.currentGame.getMetadata(query: "Site") ?? "???"
         }, set: {
-            document.currentGame.setMetadata(field: "Site", value: $0)
-            document.forceManualRefresh()
+            state.currentGame.setMetadata(field: "Site", value: $0)
+            state.forceManualRefresh()
         })
         
         let dateBinding = Binding<String>(get: {
-            document.currentGame.getMetadata(query: "Date") ?? "????.??.??"
+            state.currentGame.getMetadata(query: "Date") ?? "????.??.??"
         }, set: {
-            document.currentGame.setMetadata(field: "Date", value: $0)
-            document.forceManualRefresh()
+            state.currentGame.setMetadata(field: "Date", value: $0)
+            state.forceManualRefresh()
         })
         
         let roundBinding = Binding<String>(get: {
-            document.currentGame.getMetadata(query: "Round") ?? "?"
+            state.currentGame.getMetadata(query: "Round") ?? "?"
         }, set: {
-            document.currentGame.setMetadata(field: "Round", value: $0)
-            document.forceManualRefresh()
+            state.currentGame.setMetadata(field: "Round", value: $0)
+            state.forceManualRefresh()
         })
         
         let resultBinding = Binding<PGNGameTermination>(get: {
-            document.currentGame.gameTermination
+            state.currentGame.gameTermination
         }, set: {
-            document.currentGame.setMetadata(field: "Result", value: $0.rawValue)
-            document.currentGame.gameTermination = $0
-            document.forceManualRefresh()
+            state.currentGame.setMetadata(field: "Result", value: $0.rawValue)
+            state.currentGame.gameTermination = $0
+            state.forceManualRefresh()
         })
         
         return VStack {
@@ -112,6 +112,6 @@ struct GameMetadataEditor: View {
 
 struct GameMetadataEditor_Previews: PreviewProvider {
     static var previews: some View {
-        GameMetadataEditor(document: HolyokeDocument())
+        GameMetadataEditor()
     }
 }

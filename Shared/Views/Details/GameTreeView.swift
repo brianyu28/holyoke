@@ -10,8 +10,7 @@
 import SwiftUI
 
 struct GameTreeView: View {
-    
-    @ObservedObject var document: HolyokeDocument
+    @EnvironmentObject var state: DocumentState
     
     // layout: 2D array of (row, col) for where PGNGameNodes are laid out
     // locations: Mapping from PGNGameNode ID -> row index in the final game layout
@@ -49,10 +48,10 @@ struct GameTreeView: View {
                     if let node: PGNGameNode = tree.layout[rowIndex][colIndex] {
                         Circle()
                             .size(width: 10, height: 10)
-                            .foregroundColor(node == document.currentNode ? .blue : .black)
+                            .foregroundColor(node == state.currentNode ? .blue : .black)
                             .offset(x: CGFloat(colIndex) * 15.0, y: CGFloat(rowIndex) * 15.0)
                             .onTapGesture {
-                                document.resetChessboardToNode(node: node)
+                                state.currentNode = node
                             }
                     }
                 }
@@ -64,6 +63,6 @@ struct GameTreeView: View {
 
 struct GameTreeView_Previews: PreviewProvider {
     static var previews: some View {
-        GameTreeView(document: HolyokeDocument(), tree: (layout: [], locations: [:]))
+        GameTreeView(tree: (layout: [], locations: [:]))
     }
 }

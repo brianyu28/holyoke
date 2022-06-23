@@ -10,9 +10,8 @@
 import SwiftUI
 
 struct TestingView: View {
+    @EnvironmentObject var state: DocumentState
     @Environment(\.undoManager) var undoManager
-    
-    @ObservedObject var document: HolyokeDocument
     
     @State private var selectedTabIndex = 1
     
@@ -21,12 +20,16 @@ struct TestingView: View {
             
             // Chessboard and Controls
             VStack {
-                PlayerNamesView(whitePlayer: document.currentGame.whitePlayerName, blackPlayer: document.currentGame.blackPlayerName, turn: document.currentNode.playerColor.nextColor)
-                ChessboardView(chessboard: document.currentNode.chessboard, makeMove: document.makeMoveOnBoard)
-                GameControlsView(document: document)
-                Text(document.currentNode.chessboard!.fen)
+                PlayerNamesView(
+                    whitePlayer: state.currentGame.whitePlayerName,
+                    blackPlayer: state.currentGame.blackPlayerName,
+                    turn: state.currentNode.playerColor.nextColor
+                )
+                ChessboardView(chessboard: state.currentNode.chessboard, makeMove: state.makeMoveFromCurrentNode)
+                GameControlsView()
+                Text(state.currentNode.chessboard!.fen)
                 GeometryReader { geometry in
-                    Text(document.currentNode.moveSequenceUntilCurrentNode())
+                    Text(state.currentNode.moveSequenceUntilCurrentNode())
                         .frame(width: geometry.size.width)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
@@ -38,7 +41,7 @@ struct TestingView: View {
             
             TabView(selection: $selectedTabIndex) {
                 
-                GameMetadataView(document: document)
+                GameMetadataView()
                 .tabItem {
                     Label("Game", systemImage: "info.circle")
                 }
@@ -46,15 +49,15 @@ struct TestingView: View {
                 
                 // PGN View, move details, variations
                 VStack {
-                    GameTreeView(document: document, tree: document.currentGame.generateNodeLayout())
-                    MoveDetailView(document: document)
+                    GameTreeView(tree: state.currentGame.generateNodeLayout())
+                    MoveDetailView()
                 }
                 .tabItem {
                     Label("Moves", systemImage: "square.filled.on.square")
                 }
                 .tag(1)
                 
-                EngineView(document: document)
+                EngineView()
                 .tabItem {
                     Label("Engine", systemImage: "server.rack")
                 }
@@ -69,6 +72,6 @@ struct TestingView: View {
 
 struct TestingView_Previews: PreviewProvider {
     static var previews: some View {
-        TestingView(document: HolyokeDocument())
+        TestingView()
     }
 }

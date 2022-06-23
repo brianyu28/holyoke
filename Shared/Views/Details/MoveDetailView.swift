@@ -8,24 +8,23 @@
 import SwiftUI
 
 struct MoveDetailView: View {
-    
-    @ObservedObject var document: HolyokeDocument
+    @EnvironmentObject var state: DocumentState
     
     var body: some View {
         HStack {
             VStack {
-                if document.currentNode.moveNumber > 0 {
-                    Text(document.currentNode.pgnNotation(withMoveNumber: true, withComments: false))
-                    TextEditor(text: $document.currentNode.braceComment)
+                if state.currentNode.moveNumber > 0 {
+                    Text(state.currentNode.pgnNotation(withMoveNumber: true, withComments: false))
+                    TextEditor(text: $state.currentNode.braceComment)
                 }
                 List {
-                    ForEach(document.currentNode.variations) { variation in
+                    ForEach(state.currentNode.variations) { variation in
                         Text(variation.pgnNotation(withMoveNumber: true, withComments: false))
                             .onTapGesture {
-                                guard let move = document.currentNode.chessboard?.legalMoves[variation.move ?? ""] else {
+                                guard let move = state.currentNode.chessboard?.legalMoves[variation.move ?? ""] else {
                                     return
                                 }
-                                document.makeMoveOnBoard(move: move)
+                                state.makeMoveFromCurrentNode(move: move)
                             }
                         
                     }
@@ -38,6 +37,6 @@ struct MoveDetailView: View {
 
 struct MoveDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        MoveDetailView(document: HolyokeDocument())
+        MoveDetailView()
     }
 }

@@ -8,16 +8,15 @@
 import SwiftUI
 
 struct GameControlsView: View {
-    @ObservedObject var document: HolyokeDocument
+    @EnvironmentObject var state: DocumentState
+    @Environment(\.undoManager) var undoManager
     
     @State private var isPresentingDeleteConfirmation = false
-    
-    @Environment(\.undoManager) var undoManager
     
     var body: some View {
         HStack {
             Button {
-                document.updateCurrentNodeToPreviousVariation()
+                state.updateCurrentNodeToPreviousVariation()
             } label: {
                 Image(systemName: "arrowtriangle.up")
             }
@@ -25,7 +24,7 @@ struct GameControlsView: View {
             .help("Previous variation")
             
             Button {
-                document.updateCurrentNodeToNextVariation()
+                state.updateCurrentNodeToNextVariation()
             } label: {
                 Image(systemName: "arrowtriangle.down")
             }
@@ -41,14 +40,14 @@ struct GameControlsView: View {
             .help("Delete variation")
             .confirmationDialog("Delete game node?", isPresented: $isPresentingDeleteConfirmation) {
                 Button("Confirm Delete", role: .destructive) {
-                    document.deleteCurrentNode()
+                    state.deleteCurrentNode()
                 }
             }
             
             Spacer()
             
             Button {
-                document.updateCurrentNodeToPreviousMove()
+                state.updateCurrentNodeToPreviousMove()
             } label: {
                 Image(systemName: "arrow.left")
             }
@@ -56,7 +55,7 @@ struct GameControlsView: View {
             .help("Previous move")
             
             Button {
-                document.updateCurrentNodeToNextMove()
+                state.updateCurrentNodeToNextMove()
             } label: {
                 Image(systemName: "arrow.right")
             }
@@ -68,6 +67,6 @@ struct GameControlsView: View {
 
 struct GameControlsView_Previews: PreviewProvider {
     static var previews: some View {
-        GameControlsView(document: HolyokeDocument())
+        GameControlsView()
     }
 }

@@ -8,17 +8,17 @@
 import SwiftUI
 
 struct GamePicker: View {
+    @EnvironmentObject var state: DocumentState
     @Environment(\.undoManager) var undoManager
-    @ObservedObject var document: HolyokeDocument
     
     @State private var isPresentingDeleteConfirmation = false
     
     var body: some View {
         VStack {
             Text("**Games**")
-            Picker("Game", selection: $document.currentGameIndex) {
-                ForEach(document.games.indices, id: \.self) { index in
-                    Text(document.games[index].gameTitleDescription).tag(index)
+            Picker("Game", selection: $state.currentGameIndex) {
+                ForEach(state.document.games.indices, id: \.self) { index in
+                    Text(state.document.games[index].gameTitleDescription).tag(index)
                 }
             }
             
@@ -31,14 +31,14 @@ struct GamePicker: View {
                 .help("Delete game")
                 .confirmationDialog("Delete game?", isPresented: $isPresentingDeleteConfirmation) {
                     Button("Confirm Delete", role: .destructive) {
-                        document.deleteCurrentGame()
+                        state.deleteCurrentGame()
                     }
                 }
                 
                 Spacer()
                 
                 Button("New Game") {
-                    document.createNewGame(undoManager: undoManager)
+                    state.createNewGame()
                 }
             }
         }
@@ -47,6 +47,6 @@ struct GamePicker: View {
 
 struct GamePicker_Previews: PreviewProvider {
     static var previews: some View {
-        GamePicker(document: HolyokeDocument())
+        GamePicker()
     }
 }

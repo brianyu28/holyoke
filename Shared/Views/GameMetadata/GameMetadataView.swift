@@ -8,15 +8,13 @@
 import SwiftUI
 
 struct GameMetadataView: View {
-    @ObservedObject var document: HolyokeDocument
-    
     var body: some View {
         return VStack(alignment: .leading) {
-            GamePicker(document: document)
+            GamePicker()
             Divider()
-            GameMetadataEditor(document: document)
+            GameMetadataEditor()
             Divider()
-            GameStartPositionEditor(document: document)
+            GameStartPositionEditor()
         }
         .padding()
     }
@@ -24,6 +22,6 @@ struct GameMetadataView: View {
 
 struct GameMetadataView_Previews: PreviewProvider {
     static var previews: some View {
-        GameMetadataView(document: HolyokeDocument())
+        GameMetadataView()
     }
 }

@@ -77,6 +77,10 @@
 		D39E02772863E0DC001A0A22 /* ChessboardSquareStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E02752863E0DC001A0A22 /* ChessboardSquareStyle.swift */; };
 		D39E027A2863E11D001A0A22 /* ChessboardSquareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E02792863E11D001A0A22 /* ChessboardSquareView.swift */; };
 		D39E027B2863E11D001A0A22 /* ChessboardSquareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E02792863E11D001A0A22 /* ChessboardSquareView.swift */; };
+		D39E027F2863E883001A0A22 /* DocumentState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E027E2863E883001A0A22 /* DocumentState.swift */; };
+		D39E02802863E883001A0A22 /* DocumentState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E027E2863E883001A0A22 /* DocumentState.swift */; };
+		D39E02822863F797001A0A22 /* PGNGameNodeChessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E02812863F797001A0A22 /* PGNGameNodeChessboard.swift */; };
+		D39E02832863F797001A0A22 /* PGNGameNodeChessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E02812863F797001A0A22 /* PGNGameNodeChessboard.swift */; };
 		D3AC3CAB285A5FF5000BC33B /* PGNGameListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AC3CAA285A5FF5000BC33B /* PGNGameListener.swift */; };
 		D3AC3CAC285A5FF5000BC33B /* PGNGameListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AC3CAA285A5FF5000BC33B /* PGNGameListener.swift */; };
 		D3B468D0285174A600A97CC1 /* HolyokeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468BC285174A500A97CC1 /* HolyokeApp.swift */; };
@@ -156,6 +160,8 @@
 		D39E02722863DFED001A0A22 /* EngineLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineLine.swift; sourceTree = "<group>"; };
 		D39E02752863E0DC001A0A22 /* ChessboardSquareStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessboardSquareStyle.swift; sourceTree = "<group>"; };
 		D39E02792863E11D001A0A22 /* ChessboardSquareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessboardSquareView.swift; sourceTree = "<group>"; };
+		D39E027E2863E883001A0A22 /* DocumentState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentState.swift; sourceTree = "<group>"; };
+		D39E02812863F797001A0A22 /* PGNGameNodeChessboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGNGameNodeChessboard.swift; sourceTree = "<group>"; };
 		D3AC3CAA285A5FF5000BC33B /* PGNGameListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGNGameListener.swift; sourceTree = "<group>"; };
 		D3B468BC285174A500A97CC1 /* HolyokeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolyokeApp.swift; sourceTree = "<group>"; };
 		D3B468BD285174A500A97CC1 /* HolyokeDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolyokeDocument.swift; sourceTree = "<group>"; };
@@ -237,6 +243,7 @@
 				D332C19028635026009DB79F /* PGNGameTreeLayout.swift */,
 				D332C1922863509C009DB79F /* PGNGameNode.swift */,
 				D3AC3CAA285A5FF5000BC33B /* PGNGameListener.swift */,
+				D39E02812863F797001A0A22 /* PGNGameNodeChessboard.swift */,
 			);
 			path = PGN;
 			sourceTree = "<group>";
@@ -393,6 +400,7 @@
 			children = (
 				D3B468BC285174A500A97CC1 /* HolyokeApp.swift */,
 				D3B468BD285174A500A97CC1 /* HolyokeDocument.swift */,
+				D39E027E2863E883001A0A22 /* DocumentState.swift */,
 				D3B468BE285174A500A97CC1 /* ContentView.swift */,
 			);
 			path = App;
@@ -519,6 +527,7 @@
 				D3CFE31D28596C6C00E25606 /* ChessboardView.swift in Sources */,
 				D332C16A2863249E009DB79F /* PieceType.swift in Sources */,
 				D336AD8D28615D2100DA0D56 /* Array.swift in Sources */,
+				D39E02822863F797001A0A22 /* PGNGameNodeChessboard.swift in Sources */,
 				D379ED4328600A840078B22C /* GameMetadataView.swift in Sources */,
 				D3579AC32862AA7F000A6A9F /* GameStartPositionEditor.swift in Sources */,
 				D3B468D2285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
@@ -531,6 +540,7 @@
 				D332C164286322FE009DB79F /* UTType.swift in Sources */,
 				D3B468D0285174A600A97CC1 /* HolyokeApp.swift in Sources */,
 				D3B468D4285174A600A97CC1 /* ContentView.swift in Sources */,
+				D39E027F2863E883001A0A22 /* DocumentState.swift in Sources */,
 				D3571153285A024C002C0CC1 /* PGNParser.swift in Sources */,
 				D332C16728632330009DB79F /* PlayerColor.swift in Sources */,
 				D336AD82286143DB00DA0D56 /* EngineView.swift in Sources */,
@@ -548,6 +558,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D332C18828634A67009DB79F /* ChessboardCheck.swift in Sources */,
+				D39E02832863F797001A0A22 /* PGNGameNodeChessboard.swift in Sources */,
 				D336AD872861448C00DA0D56 /* ChessEngine.swift in Sources */,
 				D379ED47286024D80078B22C /* PlayerNamesView.swift in Sources */,
 				D3B468D3285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
@@ -565,6 +576,7 @@
 				D3571150285A024C002C0CC1 /* PGNLexer.swift in Sources */,
 				D3CFE31E28596C6C00E25606 /* ChessboardView.swift in Sources */,
 				D332C16B2863249E009DB79F /* PieceType.swift in Sources */,
+				D39E02802863E883001A0A22 /* DocumentState.swift in Sources */,
 				D336AD8E28615D2100DA0D56 /* Array.swift in Sources */,
 				D379ED4428600A840078B22C /* GameMetadataView.swift in Sources */,
 				D3579AC42862AA7F000A6A9F /* GameStartPositionEditor.swift in Sources */,

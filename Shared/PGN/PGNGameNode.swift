@@ -24,7 +24,7 @@ class PGNGameNode: Identifiable, Equatable {
     /**
      Move number represented by the current node.
      */
-    let moveNumber: Int
+    var moveNumber: Int
     
     /**
      Player that just made a move in the current position.
@@ -122,7 +122,6 @@ class PGNGameNode: Identifiable, Equatable {
      */
     public static func == (lhs: PGNGameNode, rhs: PGNGameNode) -> Bool {
         return lhs.id == rhs.id
-        
     }
     
     /**
@@ -163,28 +162,6 @@ class PGNGameNode: Identifiable, Equatable {
                 self.selectedVariationIndex = i
                 break
             }
-        }
-    }
-    
-    /**
-     Set which player is to move in the current position.
-     This value is propagated to all descendant nodes.
-     
-     - Parameters:
-        - playerToMove: The player to move in the current position.
-     */
-    func setPlayerToMove(playerToMove: PlayerColor) {
-        let currentPlayerColor = self.playerColor
-        
-        // playerColor should be the opposite of playerToMove,
-        // since playerColor is who just moved in this node, and playerToMove is whose turn it is next
-        // If they're the same, then we need to flip them
-        if currentPlayerColor == playerToMove {
-            self.playerColor = playerToMove.nextColor
-            for variation in self.variations {
-                variation.setPlayerToMove(playerToMove: playerToMove.nextColor)
-            }
-            
         }
     }
     

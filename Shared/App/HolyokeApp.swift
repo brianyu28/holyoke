@@ -11,7 +11,7 @@ import SwiftUI
 struct HolyokeApp: App {
     var body: some Scene {
         DocumentGroup(newDocument: HolyokeDocument.init) { file in
-            ContentView(document: file.document)
+            ContentView(state: DocumentState(document: file.document))
         }
     }
 }

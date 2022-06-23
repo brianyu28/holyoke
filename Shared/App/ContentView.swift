@@ -9,15 +9,16 @@ import SwiftUI
 import Antlr4
 
 struct ContentView: View {
-    @ObservedObject var document: HolyokeDocument
+    @StateObject var state: DocumentState
     
     var body: some View {
-        TestingView(document: document)
+        TestingView()
+            .environmentObject(state)
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(document: HolyokeDocument())
+        return ContentView(state: DocumentState.sampleDocumentState)
     }
 }

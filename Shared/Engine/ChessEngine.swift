@@ -91,9 +91,6 @@ class ChessEngine: ObservableObject {
                 return
             }
             let lineIndex = lineNumber - 1
-            while self.lines.count <= lineIndex {
-                self.lines.append(nil)
-            }
             
             // Get depth
             let depthIndex = subcomponents.firstIndex(of: "depth")
@@ -124,6 +121,10 @@ class ChessEngine: ObservableObject {
             
             // Add line on the main queue, since it triggers UI update
             DispatchQueue.main.async {
+                while self.lines.count <= lineIndex {
+                    self.lines.append(nil)
+                }
+                
                 self.lines[lineIndex] = Line(
                     depth: depth,
                     cp: cpDouble,
