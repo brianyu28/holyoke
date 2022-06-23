@@ -8,15 +8,22 @@
 import SwiftUI
 
 struct GameMetadataView: View {
+    @EnvironmentObject var state: DocumentState
+    
     var body: some View {
-        return VStack(alignment: .leading) {
-            GamePicker()
-            Divider()
-            GameMetadataEditor()
-            Divider()
-            GameStartPositionEditor()
+        ScrollView {
+            VStack(alignment: .leading) {
+                GamePicker()
+                Divider()
+                GameMetadataEditor()
+                Divider()
+                GameStartPositionEditor()
+                Divider()
+                Text(state.currentNode.moveSequenceUntilCurrentNode())
+                    .textSelection(.enabled)
+            }
+            .padding()
         }
-        .padding()
     }
 }
 

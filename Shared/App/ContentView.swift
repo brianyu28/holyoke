@@ -12,7 +12,7 @@ struct ContentView: View {
     @StateObject var state: DocumentState
     
     var body: some View {
-        TestingView()
+        MainDocumentView()
             .environmentObject(state)
     }
 }

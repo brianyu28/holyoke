@@ -93,8 +93,8 @@
 		D3B468D7285174A600A97CC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3B468BF285174A600A97CC1 /* Assets.xcassets */; };
 		D3CFE31D28596C6C00E25606 /* ChessboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFE31C28596C6C00E25606 /* ChessboardView.swift */; };
 		D3CFE31E28596C6C00E25606 /* ChessboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFE31C28596C6C00E25606 /* ChessboardView.swift */; };
-		D3CFE322285972AB00E25606 /* TestingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFE321285972AB00E25606 /* TestingView.swift */; };
-		D3CFE323285972AB00E25606 /* TestingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFE321285972AB00E25606 /* TestingView.swift */; };
+		D3CFE322285972AB00E25606 /* MainDocumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFE321285972AB00E25606 /* MainDocumentView.swift */; };
+		D3CFE323285972AB00E25606 /* MainDocumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFE321285972AB00E25606 /* MainDocumentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -173,7 +173,7 @@
 		D3B468CE285174A600A97CC1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3B468CF285174A600A97CC1 /* macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = macOS.entitlements; sourceTree = "<group>"; };
 		D3CFE31C28596C6C00E25606 /* ChessboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessboardView.swift; sourceTree = "<group>"; };
-		D3CFE321285972AB00E25606 /* TestingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingView.swift; sourceTree = "<group>"; };
+		D3CFE321285972AB00E25606 /* MainDocumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainDocumentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -385,7 +385,7 @@
 		D3CFE31B28596C6300E25606 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				D3CFE321285972AB00E25606 /* TestingView.swift */,
+				D3CFE321285972AB00E25606 /* MainDocumentView.swift */,
 				D39E02742863E0D2001A0A22 /* Styles */,
 				D39E02782863E10C001A0A22 /* Chessboard */,
 				D39E027C2863E623001A0A22 /* Details */,
@@ -544,7 +544,7 @@
 				D3571153285A024C002C0CC1 /* PGNParser.swift in Sources */,
 				D332C16728632330009DB79F /* PlayerColor.swift in Sources */,
 				D336AD82286143DB00DA0D56 /* EngineView.swift in Sources */,
-				D3CFE322285972AB00E25606 /* TestingView.swift in Sources */,
+				D3CFE322285972AB00E25606 /* MainDocumentView.swift in Sources */,
 				D332C17528632F96009DB79F /* BoardSquare.swift in Sources */,
 				D3579AC02862AA35000A6A9F /* GameMetadataEditor.swift in Sources */,
 				D3350F7C285D63D60025EE11 /* MoveDetailView.swift in Sources */,
@@ -592,7 +592,7 @@
 				D332C165286322FE009DB79F /* UTType.swift in Sources */,
 				D3B468D1285174A600A97CC1 /* HolyokeApp.swift in Sources */,
 				D3571154285A024C002C0CC1 /* PGNParser.swift in Sources */,
-				D3CFE323285972AB00E25606 /* TestingView.swift in Sources */,
+				D3CFE323285972AB00E25606 /* MainDocumentView.swift in Sources */,
 				D332C16828632330009DB79F /* PlayerColor.swift in Sources */,
 				D39E027B2863E11D001A0A22 /* ChessboardSquareView.swift in Sources */,
 				D336AD83286143DB00DA0D56 /* EngineView.swift in Sources */,

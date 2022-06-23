@@ -15,7 +15,7 @@ struct ChessboardView: View {
     @State var selectedSquare: BoardSquare? = nil
     @State var legalMovesForSelectedPiece: [BoardSquare: Move] = [:]
     
-    let squareSize: CGFloat = 80
+    let squareSize: CGFloat
     let squareStyle : ChessboardSquareStyle = .defaultStyle
 
     var body: some View {
@@ -106,6 +106,6 @@ struct ChessboardView: View {
 
 struct ChessboardView_Previews: PreviewProvider {
     static var previews: some View {
-        ChessboardView(chessboard: Chessboard.initInStartingPosition(), makeMove: { _ in })
+        ChessboardView(chessboard: Chessboard.initInStartingPosition(), makeMove: { _ in }, squareSize: 80)
     }
 }
