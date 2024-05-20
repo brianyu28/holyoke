@@ -29,7 +29,7 @@ struct GameTreeView: View {
         - rowIndex: The row index of the node.
         - colIndex: The column index of the node.
      
-     - Returns: A `CGSize` representing the width and height offset for the node in the layout.
+     - Returns: A `CGPoint` representing the location of the node.
      */
     static func nodeLocation(rowIndex: Int, colIndex: Int) -> CGSize {
         return CGSize(
@@ -110,40 +110,50 @@ struct GameTreeView: View {
     let tree: (layout: [[PGNGameNode?]], locations: [Int: Int])
     
     var body: some View {
-        ScrollView([.horizontal, .vertical]) {
-            ZStack {
+        ScrollViewReader { reader in
+            ScrollView([.horizontal, .vertical]) {
                 
-                ForEach(tree.layout.indices, id:\.self) { (rowIndex: Int) in
-                    ForEach(tree.layout[rowIndex].indices, id: \.self) { (colIndex: Int) in
-                        if let node: PGNGameNode = tree.layout[rowIndex][colIndex] {
-                            ForEach(node.variations) { (variation: PGNGameNode) in
-                                if let variationRow = tree.locations[variation.id] {
-                                    Self.nodePath(startRowIndex: rowIndex, endRowIndex: variationRow, startColIndex: colIndex)
-                                        .stroke(.black, lineWidth: 1)
+                ZStack {
+                    
+                    // Draw lines
+                    ForEach(tree.layout.indices, id:\.self) { (rowIndex: Int) in
+                        ForEach(tree.layout[rowIndex].indices, id: \.self) { (colIndex: Int) in
+                            if let node: PGNGameNode = tree.layout[rowIndex][colIndex] {
+                                ForEach(node.variations) { (variation: PGNGameNode) in
+                                    if let variationRow = tree.locations[variation.id] {
+                                        Self.nodePath(startRowIndex: rowIndex, endRowIndex: variationRow, startColIndex: colIndex)
+                                            .stroke(.black, lineWidth: 1)
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                
-                ForEach(0...(tree.layout.count - 1), id:\.self) { (rowIndex: Int) in
-                    ForEach(0...(tree.layout[rowIndex].count - 1), id: \.self) { (colIndex: Int) in
-                        if let node: PGNGameNode = tree.layout[rowIndex][colIndex] {
-                            Circle()
-                                .size(width: Self.nodeSize, height: Self.nodeSize)
-                                .foregroundColor(node == state.currentNode ? .blue : .black)
-                                .offset(Self.nodeLocation(rowIndex: rowIndex, colIndex: colIndex))
-                                .onTapGesture {
-                                    state.currentNode = node
-                                }
+                    
+                    // Draw nodes
+                    ForEach(0...(tree.layout.count - 1), id:\.self) { (rowIndex: Int) in
+                        ForEach(0...(tree.layout[rowIndex].count - 1), id: \.self) { (colIndex: Int) in
+                            if let node: PGNGameNode = tree.layout[rowIndex][colIndex] {
+                                Circle()
+                                    .size(width: Self.nodeSize, height: Self.nodeSize)
+                                    .foregroundColor(node == state.currentNode ? .blue : .black)
+                                    .offset(Self.nodeLocation(rowIndex: rowIndex, colIndex: colIndex))
+                                    .onTapGesture {
+                                        state.currentNode = node
+                                    }
+                                    .id(node.id)
+                            }
                         }
                     }
                 }
+                .frame(
+                    width: Self.layoutWidth(layout: tree.layout),
+                    height: Self.layoutHeight(layout: tree.layout)
+                )
+                
             }
-            .frame(
-                width: Self.layoutWidth(layout: tree.layout),
-                height: Self.layoutHeight(layout: tree.layout)
-            )
+            .onReceive(state.$currentNode) { node in
+//                reader.scrollTo(node.id, anchor: .center)
+            }
         }
     }
 }

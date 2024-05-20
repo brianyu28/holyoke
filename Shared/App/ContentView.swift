@@ -14,6 +14,7 @@ struct ContentView: View {
     var body: some View {
         MainDocumentView()
             .environmentObject(state)
+            .frame(minWidth: 700, maxWidth: .infinity, minHeight: 500, maxHeight: .infinity)
     }
 }
 

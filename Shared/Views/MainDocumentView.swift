@@ -49,11 +49,13 @@ struct MainDocumentView: View {
                     }
                     .tag(1)
                     
+                    #if os(macOS)
                     EngineView()
                     .tabItem {
                         Label("Engine", systemImage: "server.rack")
                     }
                     .tag(2)
+                    #endif
                     
                 }
                 .padding()

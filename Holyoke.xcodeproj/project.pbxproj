@@ -39,13 +39,17 @@
 		D3350F7A285D47D50025EE11 /* GameTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3350F78285D47D50025EE11 /* GameTreeView.swift */; };
 		D3350F7C285D63D60025EE11 /* MoveDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3350F7B285D63D60025EE11 /* MoveDetailView.swift */; };
 		D3350F7D285D63D60025EE11 /* MoveDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3350F7B285D63D60025EE11 /* MoveDetailView.swift */; };
-		D336AD82286143DB00DA0D56 /* EngineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D336AD81286143DB00DA0D56 /* EngineView.swift */; };
 		D336AD83286143DB00DA0D56 /* EngineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D336AD81286143DB00DA0D56 /* EngineView.swift */; };
 		D336AD872861448C00DA0D56 /* ChessEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D336AD852861448C00DA0D56 /* ChessEngine.swift */; };
 		D336AD8A28615A2D00DA0D56 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D336AD8928615A2D00DA0D56 /* Collection.swift */; };
 		D336AD8B28615A2D00DA0D56 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D336AD8928615A2D00DA0D56 /* Collection.swift */; };
 		D336AD8D28615D2100DA0D56 /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = D336AD8C28615D2100DA0D56 /* Array.swift */; };
 		D336AD8E28615D2100DA0D56 /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = D336AD8C28615D2100DA0D56 /* Array.swift */; };
+		D33A0C7B2864E4A500ECAFE2 /* PGNGameNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D332C1922863509C009DB79F /* PGNGameNode.swift */; };
+		D33A0C7C2864E4A500ECAFE2 /* PGNGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = D332C18E28635001009DB79F /* PGNGame.swift */; };
+		D33A0C7D2864E4A500ECAFE2 /* PGNGameTreeLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = D332C19028635026009DB79F /* PGNGameTreeLayout.swift */; };
+		D33A0C7E2864E4A500ECAFE2 /* PGNGameNodeChessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E02812863F797001A0A22 /* PGNGameNodeChessboard.swift */; };
+		D33A0C7F2864E4A500ECAFE2 /* PGNGameListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AC3CAA285A5FF5000BC33B /* PGNGameListener.swift */; };
 		D357114D285A024C002C0CC1 /* PGNListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3571149285A024C002C0CC1 /* PGNListener.swift */; };
 		D357114E285A024C002C0CC1 /* PGNListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3571149285A024C002C0CC1 /* PGNListener.swift */; };
 		D357114F285A024C002C0CC1 /* PGNLexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D357114A285A024C002C0CC1 /* PGNLexer.swift */; };
@@ -79,9 +83,7 @@
 		D39E027B2863E11D001A0A22 /* ChessboardSquareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E02792863E11D001A0A22 /* ChessboardSquareView.swift */; };
 		D39E027F2863E883001A0A22 /* DocumentState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E027E2863E883001A0A22 /* DocumentState.swift */; };
 		D39E02802863E883001A0A22 /* DocumentState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E027E2863E883001A0A22 /* DocumentState.swift */; };
-		D39E02822863F797001A0A22 /* PGNGameNodeChessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E02812863F797001A0A22 /* PGNGameNodeChessboard.swift */; };
 		D39E02832863F797001A0A22 /* PGNGameNodeChessboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39E02812863F797001A0A22 /* PGNGameNodeChessboard.swift */; };
-		D3AC3CAB285A5FF5000BC33B /* PGNGameListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AC3CAA285A5FF5000BC33B /* PGNGameListener.swift */; };
 		D3AC3CAC285A5FF5000BC33B /* PGNGameListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AC3CAA285A5FF5000BC33B /* PGNGameListener.swift */; };
 		D3B468D0285174A600A97CC1 /* HolyokeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468BC285174A500A97CC1 /* HolyokeApp.swift */; };
 		D3B468D1285174A600A97CC1 /* HolyokeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B468BC285174A500A97CC1 /* HolyokeApp.swift */; };
@@ -517,17 +519,20 @@
 				D384C790285588AE00E9357F /* Chessboard.swift in Sources */,
 				D332C18428634A24009DB79F /* ChessboardMoves.swift in Sources */,
 				D3579ABD2862AA03000A6A9F /* GamePicker.swift in Sources */,
-				D3AC3CAB285A5FF5000BC33B /* PGNGameListener.swift in Sources */,
 				D3350F79285D47D50025EE11 /* GameTreeView.swift in Sources */,
 				D332C17228632DF2009DB79F /* PieceAsset.swift in Sources */,
 				D3571151285A024C002C0CC1 /* PGNBaseListener.swift in Sources */,
+				D33A0C7B2864E4A500ECAFE2 /* PGNGameNode.swift in Sources */,
+				D33A0C7C2864E4A500ECAFE2 /* PGNGame.swift in Sources */,
 				D357114D285A024C002C0CC1 /* PGNListener.swift in Sources */,
+				D33A0C7F2864E4A500ECAFE2 /* PGNGameListener.swift in Sources */,
+				D33A0C7D2864E4A500ECAFE2 /* PGNGameTreeLayout.swift in Sources */,
 				D332C16D28632B74009DB79F /* Piece.swift in Sources */,
 				D357114F285A024C002C0CC1 /* PGNLexer.swift in Sources */,
 				D3CFE31D28596C6C00E25606 /* ChessboardView.swift in Sources */,
 				D332C16A2863249E009DB79F /* PieceType.swift in Sources */,
 				D336AD8D28615D2100DA0D56 /* Array.swift in Sources */,
-				D39E02822863F797001A0A22 /* PGNGameNodeChessboard.swift in Sources */,
+				D33A0C7E2864E4A500ECAFE2 /* PGNGameNodeChessboard.swift in Sources */,
 				D379ED4328600A840078B22C /* GameMetadataView.swift in Sources */,
 				D3579AC32862AA7F000A6A9F /* GameStartPositionEditor.swift in Sources */,
 				D3B468D2285174A600A97CC1 /* HolyokeDocument.swift in Sources */,
@@ -543,7 +548,6 @@
 				D39E027F2863E883001A0A22 /* DocumentState.swift in Sources */,
 				D3571153285A024C002C0CC1 /* PGNParser.swift in Sources */,
 				D332C16728632330009DB79F /* PlayerColor.swift in Sources */,
-				D336AD82286143DB00DA0D56 /* EngineView.swift in Sources */,
 				D3CFE322285972AB00E25606 /* MainDocumentView.swift in Sources */,
 				D332C17528632F96009DB79F /* BoardSquare.swift in Sources */,
 				D3579AC02862AA35000A6A9F /* GameMetadataEditor.swift in Sources */,
